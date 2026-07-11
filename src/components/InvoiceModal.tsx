@@ -20,7 +20,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   if (!type || !item) return null;
 
   const vehicle = vehicles.find((v) => v.id === item.vehicleId);
-  const driver = type === 'fuel' ? drivers.find((d) => d.id === (item as FuelEntry).driverId) : null;
+    const driver = drivers.find((d) => d.id === item.driverId) || (vehicle ? drivers.find((d) => d.id === vehicle.assignedDriverId) : null);
 
   const handlePrint = () => {
     window.print();
@@ -87,15 +87,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               {/* Brand Logo & Department */}
               <div className="flex items-start gap-3">
                 {/* Recreated Logo */}
-                <div className="flex-shrink-0 w-11 h-11 bg-rose-600 rounded-full flex items-center justify-center text-white font-black text-lg font-display tracking-tighter shadow-sm">
+                <div className="flex-shrink-0 w-11 h-11 bg-[#1a1f38] rounded-full flex items-center justify-center text-white font-black text-lg font-display tracking-tighter shadow-sm">
                   VP
                 </div>
                 <div>
                   <h1 className="text-xl font-extrabold text-blue-900 leading-none tracking-tight">
-                    Vision Food &
+                    Vision Packs
                   </h1>
                   <h1 className="text-xl font-extrabold text-blue-900 leading-none tracking-tight mt-0.5">
-                    Packaging
+                    Automobile
                   </h1>
                   <p className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mt-1">
                     FLEET MANAGEMENT DEPARTMENT
@@ -120,12 +120,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             <div className="mt-6 space-y-1 text-xs text-slate-700">
               <p className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-800">Company Name:</span>
-                <span>Vision Food & Packaging</span>
+                <span>Vision Packs Automobile</span>
               </p>
               <p className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-800">Report Type:</span>
                 <span>{isFuel ? 'Fuel Expenses Voucher' : 'Maintenance Expenses Voucher'}</span>
               </p>
+              {driver && (
+                <p className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-800">Driver Assignment:</span>
+                  <span>{driver.name} {driver.employeeId ? `(ID: ${driver.employeeId})` : ''} — {driver.designation || 'Active Driver'}</span>
+                </p>
+              )}
             </div>
 
             {/* Horizontal Line Break */}
@@ -149,10 +155,9 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <>
                         <th className="py-2.5 px-4 text-left border-r border-blue-800">DATE</th>
                         <th className="py-2.5 px-4 text-center border-r border-blue-800">VEHICLE NO#</th>
-                        <th className="py-2.5 px-4 text-left border-r border-blue-800">WORKSHOP FACILITY</th>
-                        <th className="py-2.5 px-4 text-right border-r border-blue-800">PARTS (PKR)</th>
-                        <th className="py-2.5 px-4 text-right border-r border-blue-800">LABOR (PKR)</th>
-                        <th className="py-2.5 px-4 text-right">TOTAL (PKR)</th>
+                        <th className="py-2.5 px-4 text-left border-r border-blue-800">MAINTENANCE WORK</th>
+                        <th className="py-2.5 px-4 text-left border-r border-blue-800">VENDOR/WORKSHOP</th>
+                        <th className="py-2.5 px-4 text-right">TOTAL COST (PKR)</th>
                       </>
                     )}
                   </tr>
@@ -182,14 +187,16 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <tr className="bg-white">
                         <td className="py-3 px-4 font-medium border-r border-slate-100">{item.date}</td>
                         <td className="py-3 px-4 text-center font-bold text-blue-900 border-r border-slate-100 font-mono">{vehicle?.vehicleNo || 'N/A'}</td>
-                        <td className="py-3 px-4 border-r border-slate-100 font-semibold text-slate-700">{item.workshopName}</td>
-                        <td className="py-3 px-4 text-right font-mono border-r border-slate-100">{Number(item.partsCost).toLocaleString()}</td>
-                        <td className="py-3 px-4 text-right font-mono border-r border-slate-100">{Number(item.laborCost).toLocaleString()}</td>
+                        <td className="py-3 px-4 border-r border-slate-100 font-semibold text-slate-700">{item.maintenanceType || 'Maintenance Work'}</td>
+                        <td className="py-3 px-4 border-r border-slate-100 font-semibold text-slate-700">
+                          <div>{item.workshopName}</div>
+                          {item.vendorAddress && <div className="text-[10px] text-slate-500 mt-0.5">{item.vendorAddress}</div>}
+                        </td>
                         <td className="py-3 px-4 text-right font-bold text-blue-900 font-mono">PKR {Number(item.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       </tr>
                       {/* Total row */}
                       <tr className="bg-slate-50 font-bold border-t border-slate-300">
-                        <td colSpan={4} className="py-3 px-4 text-right uppercase tracking-wider text-slate-500 text-[10px]"></td>
+                        <td colSpan={3} className="py-3 px-4 text-right uppercase tracking-wider text-slate-500 text-[10px]"></td>
                         <td className="py-3 px-4 text-right uppercase tracking-wider text-slate-900 text-[10px] border-r border-slate-200">GRAND TOTAL</td>
                         <td className="py-3 px-4 text-right text-blue-900 font-black font-mono text-xs">
                           PKR {Number(item.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -210,8 +217,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 </>
               ) : (
                 <>
-                  <p><span className="font-bold uppercase">Work Status:</span> <span className="font-medium text-slate-700">{item.status}</span></p>
-                  <p className="text-right"><span className="font-bold uppercase">Next Scheduled Tune-Up:</span> <span className="font-medium text-slate-700">{item.nextMaintenanceDate}</span></p>
+                  <p>
+                    <span className="font-bold uppercase">Work Status:</span> <span className="font-medium text-emerald-600 font-bold">{item.status}</span>
+                    {item.notes && <span className="block text-slate-600 mt-1"><span className="font-bold">NOTES:</span> {item.notes}</span>}
+                  </p>
+                  <p className="text-right">
+                    {item.currentReading !== undefined && <span className="block"><span className="font-bold uppercase">Odometer Current:</span> <span className="font-mono font-medium text-slate-700">{Number(item.currentReading).toLocaleString()} KM</span></span>}
+                    {item.nextReading !== undefined && <span className="block mt-0.5"><span className="font-bold uppercase">Next Service due (odometer):</span> <span className="font-mono font-semibold text-rose-600">{Number(item.nextReading).toLocaleString()} KM</span></span>}
+                    {item.nextMaintenanceDate && <span className="block mt-0.5"><span className="font-bold uppercase">Next Scheduled Date:</span> <span className="font-medium text-slate-700">{item.nextMaintenanceDate}</span></span>}
+                  </p>
                 </>
               )}
             </div>

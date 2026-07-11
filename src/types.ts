@@ -8,6 +8,18 @@ export interface Vehicle {
   chassisNo: string;
   engineNo: string;
   insuranceStatus: 'Active' | 'Expired' | 'Pending';
+  
+  // Fields from Screenshot 1
+  modelYear?: string;
+  department?: 'General' | 'SCM' | 'Accounts' | 'Sale' | 'Admin' | 'Production' | '';
+  status?: 'Active' | 'Inactive' | 'Maintenance' | 'Sold';
+  assignedDriverId?: string; // Links to Driver
+  designation?: string;
+  employeeId?: string;
+  allotmentDate?: string;
+  insuranceExpiryDate?: string;
+  sundarETag?: boolean;
+  environmentalTag?: boolean;
 }
 
 export interface Driver {
@@ -51,6 +63,14 @@ export interface MaintenanceEntry {
   totalCost: number; // calculated parts + labor
   nextMaintenanceDate: string;
   status: 'Pending' | 'Completed';
+  
+  // Fields from Screenshot 2
+  driverId?: string;
+  maintenanceType?: string;
+  vendorAddress?: string;
+  currentReading?: number;
+  nextReading?: number;
+  notes?: string;
 }
 
 export interface TokenTaxEntry {

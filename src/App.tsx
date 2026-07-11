@@ -412,6 +412,7 @@ export default function App() {
           {currentTab === 'vehicles' && (
             <VehiclesTab
               vehicles={state.vehicles}
+              drivers={state.drivers}
               allotments={allotmentsMappedForVehicles}
               onAddVehicle={handleAddVehicle}
               onEditVehicle={handleEditVehicle}
@@ -470,6 +471,7 @@ export default function App() {
             <MaintenanceTab
               maintenanceEntries={state.maintenanceEntries}
               vehicles={state.vehicles}
+              drivers={state.drivers}
               onAddMaintenanceEntry={handleAddMaintenanceEntry}
               onEditMaintenanceEntry={handleEditMaintenanceEntry}
               onDeleteMaintenanceEntry={handleDeleteMaintenanceEntry}

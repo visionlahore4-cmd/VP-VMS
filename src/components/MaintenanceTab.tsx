@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { MaintenanceEntry, Vehicle } from '../types';
+import { MaintenanceEntry, Vehicle, Driver } from '../types';
 import { Plus, Search, Edit2, Trash2, Wrench, Calendar, DollarSign, CheckCircle2, Clock, Printer, Info, X } from 'lucide-react';
 
 interface MaintenanceTabProps {
   maintenanceEntries: MaintenanceEntry[];
   vehicles: Vehicle[];
+  drivers: Driver[];
   onAddMaintenanceEntry: (entry: Omit<MaintenanceEntry, 'id'>) => void;
   onEditMaintenanceEntry: (entry: MaintenanceEntry) => void;
   onDeleteMaintenanceEntry: (id: string) => void;
@@ -14,6 +15,7 @@ interface MaintenanceTabProps {
 export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
   maintenanceEntries,
   vehicles,
+  drivers,
   onAddMaintenanceEntry,
   onEditMaintenanceEntry,
   onDeleteMaintenanceEntry,
@@ -26,65 +28,93 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<MaintenanceEntry | null>(null);
 
-  // Form states
-  const [date, setDate] = useState('');
+  // Form states from Screenshot 2
   const [vehicleId, setVehicleId] = useState('');
-  const [workshopName, setWorkshopName] = useState('');
-  const [partsCost, setPartsCost] = useState<number | ''>('');
-  const [laborCost, setLaborCost] = useState<number | ''>('');
-  const [totalCost, setTotalCost] = useState<number>(0);
+  const [driverId, setDriverId] = useState('');
+  const [maintenanceType, setMaintenanceType] = useState('Maintenance');
+  const [date, setDate] = useState('');
+  const [partsCost, setPartsCost] = useState<number | ''>(''); // Cost (PKR)
+  const [laborCost, setLaborCost] = useState<number | ''>(''); // Hidden / secondary cost, default 0
+  const [status, setStatus] = useState<MaintenanceEntry['status']>('Completed');
+  const [workshopName, setWorkshopName] = useState(''); // Vendor / Company name
+  const [vendorAddress, setVendorAddress] = useState('');
+  const [currentReading, setCurrentReading] = useState<number | ''>('');
+  const [nextReading, setNextReading] = useState<number | ''>('');
+  const [notes, setNotes] = useState('');
   const [nextMaintenanceDate, setNextMaintenanceDate] = useState('');
-  const [status, setStatus] = useState<MaintenanceEntry['status']>('Pending');
-
-  // Auto-calculate Total Cost = Parts Cost + Labor Cost
-  useEffect(() => {
-    const p = Number(partsCost) || 0;
-    const l = Number(laborCost) || 0;
-    setTotalCost(p + l);
-  }, [partsCost, laborCost]);
 
   const openAddModal = () => {
     setEditingEntry(null);
-    setDate(new Date().toISOString().split('T')[0]);
     setVehicleId(vehicles[0]?.id || '');
-    setWorkshopName('');
+    setDriverId('');
+    setMaintenanceType('Maintenance');
+    setDate(new Date().toISOString().split('T')[0]);
     setPartsCost('');
     setLaborCost('');
-    // Set default next maintenance in 3 months (90 days)
+    setStatus('Completed');
+    setWorkshopName('');
+    setVendorAddress('');
+    setCurrentReading('');
+    setNextReading('');
+    setNotes('');
+    
+    // Default next maintenance date in 3 months
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 90);
     setNextMaintenanceDate(futureDate.toISOString().split('T')[0]);
-    setStatus('Pending');
+    
     setIsModalOpen(true);
   };
 
   const openEditModal = (entry: MaintenanceEntry) => {
     setEditingEntry(entry);
-    setDate(entry.date);
     setVehicleId(entry.vehicleId);
-    setWorkshopName(entry.workshopName);
-    setPartsCost(entry.partsCost);
-    setLaborCost(entry.laborCost);
-    setNextMaintenanceDate(entry.nextMaintenanceDate);
+    setDriverId(entry.driverId || '');
+    setMaintenanceType(entry.maintenanceType || 'Maintenance');
+    setDate(entry.date);
+    setPartsCost(entry.partsCost !== 0 ? entry.partsCost : '');
+    setLaborCost(entry.laborCost !== 0 ? entry.laborCost : '');
     setStatus(entry.status);
+    setWorkshopName(entry.workshopName);
+    setVendorAddress(entry.vendorAddress || '');
+    setCurrentReading(entry.currentReading !== undefined ? entry.currentReading : '');
+    setNextReading(entry.nextReading !== undefined ? entry.nextReading : '');
+    setNotes(entry.notes || '');
+    setNextMaintenanceDate(entry.nextMaintenanceDate || '');
+    
     setIsModalOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vehicleId || !workshopName.trim() || !date || !nextMaintenanceDate) return;
+    if (!vehicleId || !workshopName.trim() || !date) return;
 
-    const calculatedTotal = (Number(partsCost) || 0) + (Number(laborCost) || 0);
+    const finalPartsCost = Number(partsCost) || 0;
+    const finalLaborCost = Number(laborCost) || 0;
+
+    // Default next service date in 3 months if empty
+    let finalNextMaintDate = nextMaintenanceDate;
+    if (!finalNextMaintDate) {
+      const dObj = new Date(date);
+      dObj.setDate(dObj.getDate() + 90);
+      finalNextMaintDate = dObj.toISOString().split('T')[0];
+    }
 
     const data = {
       date,
       vehicleId,
+      driverId,
+      maintenanceType,
       workshopName: workshopName.trim(),
-      partsCost: Number(partsCost) || 0,
-      laborCost: Number(laborCost) || 0,
-      totalCost: calculatedTotal,
-      nextMaintenanceDate,
-      status
+      vendorAddress: vendorAddress.trim(),
+      partsCost: finalPartsCost,
+      laborCost: finalLaborCost,
+      totalCost: finalPartsCost + finalLaborCost,
+      nextMaintenanceDate: finalNextMaintDate,
+      currentReading: currentReading !== '' ? Number(currentReading) : undefined,
+      nextReading: nextReading !== '' ? Number(nextReading) : undefined,
+      status,
+      notes: notes.trim()
     };
 
     if (editingEntry) {
@@ -282,13 +312,13 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
 
       {/* Add / Edit Centered Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md no-print">
-          <div className="w-full max-w-md rounded-2xl glass-panel border border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md no-print overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl glass-panel border border-slate-800 shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200 bg-[#161a33]/95">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60 bg-[#121528]/80">
               <h3 className="font-display font-bold text-slate-100 text-lg">
-                {editingEntry ? 'Edit Workshop Bill Log' : 'Log New Mechanical Repair Bill'}
+                Log Maintenance
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -301,43 +331,17 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               
-              <div className="grid grid-cols-2 gap-4">
-                {/* Date */}
+              {/* Row 1: Vehicle & Driver */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Service Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
-                  />
-                </div>
-
-                {/* Status selection */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Repair Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as MaintenanceEntry['status'])}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none cursor-pointer"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Vehicle Selection */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Choose Vehicle *</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Vehicle *</label>
                   <select
                     required
                     value={vehicleId}
                     onChange={(e) => setVehicleId(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none cursor-pointer"
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
                   >
+                    <option value="">Select Vehicle</option>
                     {vehicles.map(v => (
                       <option key={v.id} value={v.id}>
                         {v.vehicleNo} — {v.modelName}
@@ -346,85 +350,162 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
                   </select>
                 </div>
 
-                {/* Workshop Facility name */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Workshop Facility *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Toyota Township Motors"
-                    value={workshopName}
-                    onChange={(e) => setWorkshopName(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
-                  />
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Driver</label>
+                  <select
+                    value={driverId}
+                    onChange={(e) => setDriverId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                  >
+                    <option value="">Select Driver</option>
+                    {drivers.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Parts Cost */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Parts Cost (PKR) *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="e.g. 8500"
-                    value={partsCost}
-                    onChange={(e) => setPartsCost(e.target.value !== '' ? Number(e.target.value) : '')}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none font-mono"
-                  />
-                </div>
-
-                {/* Labor Cost */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Labor Cost (PKR) *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="e.g. 3500"
-                    value={laborCost}
-                    onChange={(e) => setLaborCost(e.target.value !== '' ? Number(e.target.value) : '')}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none font-mono"
-                  />
-                </div>
+              {/* Row 2: Maintenance Type */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Maintenance Type *</label>
+                <select
+                  required
+                  value={maintenanceType}
+                  onChange={(e) => setMaintenanceType(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                >
+                  <option value="Select Type">Select Type</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Engine Oil / Oil Filter">Engine Oil / Oil Filter</option>
+                  <option value="Tire Replacement">Tire Replacement</option>
+                  <option value="Brake Pad / Disc Service">Brake Pad / Disc Service</option>
+                  <option value="Tuning & Plug Service">Tuning & Plug Service</option>
+                  <option value="AC Filter / Service">AC Filter / Service</option>
+                  <option value="Suspension & Steering">Suspension & Steering</option>
+                  <option value="Body & Painting">Body & Painting</option>
+                  <option value="Electrical & Wiring">Electrical & Wiring</option>
+                  <option value="General Checkup">General Checkup</option>
+                </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Live calculated Total Cost */}
+              {/* Row 3: Date & Cost */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Total Computed Bill</label>
-                  <div className="w-full px-3 py-2 bg-slate-950 rounded-lg text-sm font-bold text-emerald-400 border border-slate-850 flex items-center h-9 font-mono">
-                    PKR {totalCost.toLocaleString()}
-                  </div>
-                  <span className="text-[10px] text-slate-500 block mt-1">Parts + Labor combined</span>
-                </div>
-
-                {/* Next scheduled maintenance */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Next Service Due *</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Date *</label>
                   <input
                     type="date"
                     required
-                    value={nextMaintenanceDate}
-                    onChange={(e) => setNextMaintenanceDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Cost (PKR) *</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="e.g. 5000"
+                    value={partsCost}
+                    onChange={(e) => setPartsCost(e.target.value !== '' ? Number(e.target.value) : '')}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600 font-mono"
                   />
                 </div>
               </div>
 
+              {/* Row 4: Status */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Status</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as MaintenanceEntry['status'])}
+                  className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                >
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+
+              {/* Row 5: Vendor Name & Vendor Address */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Vendor / Company Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Al-Madina Auto Workshop"
+                    value={workshopName}
+                    onChange={(e) => setWorkshopName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Vendor Address</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. GT Road, Lahore"
+                    value={vendorAddress}
+                    onChange={(e) => setVendorAddress(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                </div>
+              </div>
+
+              {/* Row 6: Current Reading & Next Reading */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Current Reading (KM)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 45000"
+                    value={currentReading}
+                    onChange={(e) => setCurrentReading(e.target.value !== '' ? Number(e.target.value) : '')}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Next Reading (KM)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 50000"
+                    value={nextReading}
+                    onChange={(e) => setNextReading(e.target.value !== '' ? Number(e.target.value) : '')}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600 font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Row 7: Notes */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Notes</label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe the maintenance work..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                />
+              </div>
+
               {/* Form Actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/60">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors cursor-pointer"
+                  className="px-5 py-2.5 text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all border border-transparent hover:border-slate-800 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg transition-all glow-emerald cursor-pointer"
+                  className="px-6 py-2.5 text-sm font-semibold bg-[#6366f1] hover:bg-[#5053e1] text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer"
                 >
-                  {editingEntry ? 'Update Bill' : 'Save Workshop Log'}
+                  Save Record
                 </button>
               </div>
 
