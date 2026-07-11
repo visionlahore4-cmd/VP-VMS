@@ -1,6 +1,7 @@
 import React from 'react';
 import { FuelEntry, MaintenanceEntry, Vehicle, Driver } from '../types';
 import { X, Printer, Shield } from 'lucide-react';
+import { VisionPackagingLogo } from './VisionPackagingLogo';
 
 interface InvoiceModalProps {
   type: 'fuel' | 'maintenance' | null;
@@ -85,19 +86,16 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             <div className="flex justify-between items-start">
               
               {/* Brand Logo & Department */}
-              <div className="flex items-start gap-3">
-                {/* Recreated Logo */}
-                <div className="flex-shrink-0 w-11 h-11 bg-[#1a1f38] rounded-full flex items-center justify-center text-white font-black text-lg font-display tracking-tighter shadow-sm">
-                  VP
-                </div>
+              <div className="flex items-center gap-3">
+                <VisionPackagingLogo layout="horizontal" size="sm" showText={false} light={true} />
                 <div>
-                  <h1 className="text-xl font-extrabold text-blue-900 leading-none tracking-tight">
-                    Vision Packs
+                  <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight uppercase">
+                    Vision Packaging
                   </h1>
-                  <h1 className="text-xl font-extrabold text-blue-900 leading-none tracking-tight mt-0.5">
-                    Automobile
-                  </h1>
-                  <p className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mt-1">
+                  <p className="text-[7px] font-bold text-rose-600 tracking-[0.2em] uppercase mt-0.5 leading-none">
+                    Safe Inside
+                  </p>
+                  <p className="text-[8px] font-black text-blue-900 tracking-wide uppercase mt-2">
                     FLEET MANAGEMENT DEPARTMENT
                   </p>
                 </div>

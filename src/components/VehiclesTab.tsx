@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Vehicle, Driver } from '../types';
-import { Plus, Search, Edit2, Trash2, Shield, Settings, Info, X } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Shield, Settings, Info, X, Check, Briefcase, Car, Bike, Truck } from 'lucide-react';
 
 interface VehiclesTabProps {
   vehicles: Vehicle[];
@@ -210,102 +210,175 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-950/50 text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-800">
+              <thead className="bg-[#121528] text-slate-400 text-[10px] uppercase tracking-wider font-bold border-b border-slate-800/80">
                 <tr>
-                  <th className="py-3.5 px-4 pl-6">Plate (Reg No)</th>
-                  <th className="py-3.5 px-4">Type & Model</th>
-                  <th className="py-3.5 px-4">Engine CC / Color</th>
-                  <th className="py-3.5 px-4">Chassis / Engine Code</th>
-                  <th className="py-3.5 px-4">Allotment</th>
-                  <th className="py-3.5 px-4">Insurance</th>
-                  <th className="py-3.5 px-4 text-right pr-6">Actions</th>
+                  <th className="py-3 px-4 pl-6 text-left">SR</th>
+                  <th className="py-3 px-4 text-left">REG NO</th>
+                  <th className="py-3 px-4 text-left">MODEL</th>
+                  <th className="py-3 px-4 text-left">MAKE & TYPE</th>
+                  <th className="py-3 px-4 text-left">COLOR / POWER</th>
+                  <th className="py-3 px-4 text-left">CHASSIS & ENGINE NO</th>
+                  <th className="py-3 px-4 text-left">ASSIGNED TO & DESIGNATION</th>
+                  <th className="py-3 px-4 text-left">DEPT</th>
+                  <th className="py-3 px-4 text-center">INSURANCE</th>
+                  <th className="py-3 px-4 text-center">TAG</th>
+                  <th className="py-3 px-4 text-right pr-6">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-900/60">
-                {filteredVehicles.map((vehicle) => {
-                  const matchingAllotment = allotments.find(a => a.vehicleId === vehicle.id);
+              <tbody className="divide-y divide-slate-800/50 bg-[#0c0f1d]/40">
+                {filteredVehicles.map((vehicle, index) => {
+                  const assignedDriver = drivers.find(d => d.id === vehicle.assignedDriverId);
                   const isInsuranceActive = vehicle.insuranceStatus === 'Active';
                   const isInsuranceExpired = vehicle.insuranceStatus === 'Expired';
-
+                  
+                  // Icons for model types
+                  const isMotorcycle = vehicle.vehicleType === 'Motorcycle';
+                  const isTruck = vehicle.vehicleType === 'Truck';
+                  const isVan = vehicle.vehicleType === 'Van';
+                  
                   return (
-                    <tr key={vehicle.id} className="hover:bg-slate-900/20 transition-all duration-150">
+                    <tr key={vehicle.id} className="hover:bg-slate-900/40 transition-all duration-150 align-middle">
                       
+                      {/* Serial Number */}
+                      <td className="py-3.5 px-4 pl-6 text-slate-400 font-bold text-xs">
+                        {index + 1}
+                      </td>
+
                       {/* Register Number plate */}
-                      <td className="py-4 px-4 pl-6">
-                        <div className="inline-flex flex-col bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 font-mono">
-                          <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest text-center border-b border-slate-800 pb-0.5 mb-0.5">Pakistan</span>
-                          <span className="text-emerald-400 font-bold text-xs tracking-wider text-center">{vehicle.vehicleNo}</span>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-block px-3 py-1.5 bg-[#1e293b]/50 border border-slate-800 text-slate-200 font-mono font-bold text-xs rounded shadow-sm tracking-wider">
+                          {vehicle.vehicleNo}
+                        </span>
+                      </td>
+
+                      {/* Brand Model name & year */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                            isMotorcycle 
+                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                              : isTruck 
+                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                : isVan 
+                                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                                  : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                          }`}>
+                            {isMotorcycle ? (
+                              <Bike className="w-4 h-4" />
+                            ) : isTruck ? (
+                              <Truck className="w-4 h-4" />
+                            ) : (
+                              <Car className="w-4 h-4" />
+                            )}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-extrabold text-slate-200 text-sm leading-tight">{vehicle.modelName}</span>
+                            <span className="text-[10px] text-slate-500 font-bold mt-0.5">{vehicle.modelYear || '—'}</span>
+                          </div>
                         </div>
                       </td>
 
-                      {/* Brand Model name & specs */}
-                      <td className="py-4 px-4">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-200">{vehicle.modelName}</span>
-                          <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">{vehicle.vehicleType}</span>
-                        </div>
+                      {/* Make & Type */}
+                      <td className="py-3.5 px-4 text-slate-300 font-semibold text-xs">
+                        {vehicle.vehicleType}
                       </td>
 
                       {/* Specs engineCC & color */}
-                      <td className="py-4 px-4">
-                        <div className="flex flex-col text-xs text-slate-300">
-                          <span>{vehicle.engineCC} CC</span>
-                          <span className="text-[10px] text-slate-500">{vehicle.color}</span>
+                      <td className="py-3.5 px-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-200 text-xs">{vehicle.color}</span>
+                          <span className="text-[10px] text-slate-500 font-bold mt-0.5">{vehicle.engineCC ? `${vehicle.engineCC} CC` : '—'}</span>
                         </div>
                       </td>
 
                       {/* Hardware Chassis & Engine code */}
-                      <td className="py-4 px-4 font-mono text-xs text-slate-400">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400 leading-normal">
                         <div className="flex flex-col">
-                          <span>C: {vehicle.chassisNo}</span>
-                          <span>E: {vehicle.engineNo}</span>
+                          <span className="tracking-tight text-slate-300">{vehicle.chassisNo || '—'}</span>
+                          <span className="text-[10px] text-slate-500 mt-0.5">{vehicle.engineNo || '—'}</span>
                         </div>
                       </td>
 
-                      {/* Active assignment department badge */}
-                      <td className="py-4 px-4">
-                        {matchingAllotment ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            {matchingAllotment.department} Dept
+                      {/* Active assignment driver & designation */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex flex-col">
+                          <span className="font-extrabold text-slate-200 text-sm leading-tight">
+                            {assignedDriver ? assignedDriver.name : '—'}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-bold mt-0.5 leading-none">
+                            {vehicle.designation || '—'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Department Badge */}
+                      <td className="py-3.5 px-4">
+                        {vehicle.department ? (
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold border ${
+                            vehicle.department === 'Sale'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              : vehicle.department === 'Accounts'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                : vehicle.department === 'Admin'
+                                  ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                                  : vehicle.department === 'SCM'
+                                    ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                                    : vehicle.department === 'Production'
+                                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                      : 'bg-blue-500/10 text-blue-400 border-blue-500/20' // General
+                          }`}>
+                            <Briefcase className="w-3 h-3 opacity-85" />
+                            {vehicle.department}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-slate-800/40 text-slate-400 border border-slate-800">
-                            Pool Garage
-                          </span>
+                          <span className="text-slate-600 font-bold text-xs">—</span>
                         )}
                       </td>
 
-                      {/* Insurance status */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-1.5">
-                          <Shield className={`w-3.5 h-3.5 ${
-                            isInsuranceActive 
-                              ? 'text-emerald-400' 
-                              : isInsuranceExpired 
-                                ? 'text-orange-500' 
-                                : 'text-slate-400'
-                          }`} />
-                          <span className={`text-xs font-semibold ${
-                            isInsuranceActive 
-                              ? 'text-emerald-400' 
-                              : isInsuranceExpired 
-                                ? 'text-orange-400' 
-                                : 'text-slate-400'
-                          }`}>
-                            {vehicle.insuranceStatus}
-                          </span>
+                      {/* Insurance status badge */}
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="inline-flex justify-center">
+                          {isInsuranceActive ? (
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#065f46]/25 text-[#34d399] border border-[#065f46]/40 leading-none">
+                              ✓ Insured
+                            </span>
+                          ) : isInsuranceExpired ? (
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-950/40 text-rose-400 border border-rose-900/40 leading-none">
+                              ✓ Expired
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/40 leading-none">
+                              ✓ Pending
+                            </span>
+                          )}
                         </div>
                       </td>
 
-                      {/* Actions */}
-                      <td className="py-4 px-4 text-right pr-6">
+                      {/* E-Tag and Environmental tag ticks */}
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="inline-flex items-center justify-center gap-1.5 text-sm font-black">
+                          {vehicle.sundarETag ? (
+                            <span className="text-emerald-400" title="Sundar E-Tag: Active">✓</span>
+                          ) : (
+                            <span className="text-red-500" title="Sundar E-Tag: Inactive">✗</span>
+                          )}
+                          {vehicle.environmentalTag ? (
+                            <span className="text-emerald-400" title="Environmental Tag: Active">✓</span>
+                          ) : (
+                            <span className="text-red-500" title="Environmental Tag: Inactive">✗</span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Actions buttons */}
+                      <td className="py-3.5 px-4 text-right pr-6">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditModal(vehicle)}
-                            title="Edit Vehicle"
-                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-3 h-3 text-emerald-400" />
+                            <span>Edit</span>
                           </button>
                           <button
                             onClick={() => {
@@ -314,9 +387,9 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                               }
                             }}
                             title="Delete Vehicle"
-                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                            className="p-1.5 hover:bg-red-500/10 hover:text-red-400 rounded-lg cursor-pointer border border-transparent hover:border-red-500/10 transition-colors"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-red-400" />
                           </button>
                         </div>
                       </td>

@@ -12,6 +12,7 @@ import {
   X,
   Gauge
 } from 'lucide-react';
+import { VisionPackagingLogo } from './VisionPackagingLogo';
 
 interface SidebarProps {
   currentTab: string;
@@ -52,17 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
         <div className="space-y-8">
           {/* App Brand / Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
-                <Gauge className="w-4 h-4" />
-              </div>
-              <div>
-                <h1 className="font-display text-lg font-bold text-white tracking-tight leading-none">
-                  Vision <span className="text-emerald-400">Packs</span>
-                </h1>
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-500/80">Automobile Hub</span>
-              </div>
-            </div>
+            <VisionPackagingLogo layout="horizontal" size="sm" showText={true} light={false} />
             
             {/* Close Button for Mobile */}
             <button 
