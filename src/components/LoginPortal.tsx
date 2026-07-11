@@ -129,6 +129,22 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
             </button>
           </form>
 
+          {/* Reset password button */}
+          <div className="pt-2 text-center">
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to reset credentials to the default? (vision / vision123)')) {
+                  localStorage.removeItem('portal_username');
+                  localStorage.removeItem('portal_password');
+                  addToast('Credentials reset to default.', 'info');
+                }
+              }}
+              className="text-[10px] font-bold text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-wider"
+            >
+              Forgot Password? Reset to Default
+            </button>
+          </div>
+
         </div>
 
         {/* Footer info tag */}
