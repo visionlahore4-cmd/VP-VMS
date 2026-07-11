@@ -10,7 +10,8 @@ import {
   FileText, 
   Database,
   X,
-  Gauge
+  Gauge,
+  Receipt
 } from 'lucide-react';
 import { VisionPackagingLogo } from './VisionPackagingLogo';
 
@@ -31,6 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
     { id: 'fuel', label: 'Fuel Management', icon: Fuel },
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'tokentax', label: 'Token Tax & E-Tag', icon: FileText },
+    { id: 'bills', label: 'Bills & Invoices', icon: Receipt },
     { id: 'database', label: 'Data & Backup', icon: Database },
   ];
 

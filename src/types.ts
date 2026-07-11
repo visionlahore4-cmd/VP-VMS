@@ -14,6 +14,7 @@ export interface Vehicle {
   department?: 'General' | 'SCM' | 'Accounts' | 'Sale' | 'Admin' | 'Production' | '';
   status?: 'Active' | 'Inactive' | 'Maintenance' | 'Sold';
   assignedDriverId?: string; // Links to Driver
+  customRiderName?: string; // Manual custom rider name
   designation?: string;
   employeeId?: string;
   allotmentDate?: string;
@@ -51,6 +52,7 @@ export interface FuelEntry {
   odometerReading: number;
   pumpName: string;
   calculatedAverage?: number; // km/L, calculated relative to previous odometer reading
+  status?: 'Pending' | 'Completed';
 }
 
 export interface MaintenanceEntry {

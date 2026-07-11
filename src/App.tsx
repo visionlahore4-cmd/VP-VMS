@@ -21,6 +21,7 @@ import { MaintenanceTab } from './components/MaintenanceTab';
 import { TokenTaxTab } from './components/TokenTaxTab';
 import { DataManagementTab } from './components/DataManagementTab';
 import { BikesTab } from './components/BikesTab';
+import { BillsTab } from './components/BillsTab';
 import { InvoiceModal } from './components/InvoiceModal';
 
 import { Menu, User, Sparkles } from 'lucide-react';
@@ -487,6 +488,18 @@ export default function App() {
               onAddTokenTaxEntry={handleAddTokenTaxEntry}
               onEditTokenTaxEntry={handleEditTokenTaxEntry}
               onDeleteTokenTaxEntry={handleDeleteTokenTaxEntry}
+            />
+          )}
+
+          {currentTab === 'bills' && (
+            <BillsTab
+              fuelEntries={state.fuelEntries}
+              maintenanceEntries={state.maintenanceEntries}
+              vehicles={state.vehicles}
+              drivers={state.drivers}
+              onEditFuelEntry={handleEditFuelEntry}
+              onEditMaintenanceEntry={handleEditMaintenanceEntry}
+              onViewInvoice={handleViewInvoice}
             />
           )}
 

@@ -39,6 +39,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
   const [department, setDepartment] = useState<Vehicle['department']>('');
   const [status, setStatus] = useState<Vehicle['status']>('Active');
   const [assignedDriverId, setAssignedDriverId] = useState('');
+  const [customRiderName, setCustomRiderName] = useState('');
   const [designation, setDesignation] = useState('');
   const [employeeId, setEmployeeId] = useState('');
   const [allotmentDate, setAllotmentDate] = useState('');
@@ -61,6 +62,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
     setDepartment('');
     setStatus('Active');
     setAssignedDriverId('');
+    setCustomRiderName('');
     setDesignation('');
     setEmployeeId('');
     setAllotmentDate('');
@@ -86,6 +88,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
     setDepartment(bike.department || '');
     setStatus(bike.status || 'Active');
     setAssignedDriverId(bike.assignedDriverId || '');
+    setCustomRiderName(bike.customRiderName || '');
     setDesignation(bike.designation || '');
     setEmployeeId(bike.employeeId || '');
     setAllotmentDate(bike.allotmentDate || '');
@@ -115,6 +118,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
       department: department || '',
       status,
       assignedDriverId,
+      customRiderName: customRiderName.trim(),
       designation: designation.trim(),
       employeeId: employeeId.trim(),
       allotmentDate,
@@ -148,6 +152,13 @@ export const BikesTab: React.FC<BikesTabProps> = ({
   
   // Find allotted rider details for each bike
   const getBikeAllotment = (bike: Vehicle) => {
+    if (bike.customRiderName) {
+      return {
+        riderName: bike.customRiderName,
+        department: bike.department || 'General',
+        date: bike.allotmentDate || '—'
+      };
+    }
     if (bike.assignedDriverId) {
       const rider = drivers.find(d => d.id === bike.assignedDriverId);
       return {
@@ -166,7 +177,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
     };
   };
 
-  const allottedBikesCount = allBikes.filter(b => !!b.assignedDriverId || allotments.some(a => a.vehicleId === b.id)).length;
+  const allottedBikesCount = allBikes.filter(b => !!b.customRiderName || !!b.assignedDriverId || allotments.some(a => a.vehicleId === b.id)).length;
   const unallottedBikesCount = totalBikesCount - allottedBikesCount;
 
   return (
@@ -527,17 +538,31 @@ export const BikesTab: React.FC<BikesTabProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Assigned Rider</label>
-                  <select
-                    value={assignedDriverId}
-                    onChange={(e) => setAssignedDriverId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
-                  >
-                    <option value="">— Unassigned —</option>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Assigned Rider (Select or Type Name)</label>
+                  <input
+                    type="text"
+                    list="drivers-autocomplete"
+                    placeholder="Type or select rider name..."
+                    value={customRiderName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomRiderName(val);
+                      
+                      // Auto-link to matching driver ID if selected from list
+                      const matched = drivers.find(d => d.name.toLowerCase() === val.trim().toLowerCase());
+                      if (matched) {
+                        setAssignedDriverId(matched.id);
+                      } else {
+                        setAssignedDriverId('');
+                      }
+                    }}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                  <datalist id="drivers-autocomplete">
                     {drivers.map(d => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
+                      <option key={d.id} value={d.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
 
