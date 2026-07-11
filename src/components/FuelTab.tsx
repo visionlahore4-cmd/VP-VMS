@@ -71,13 +71,8 @@ export const FuelTab: React.FC<FuelTabProps> = ({
     setEditingEntry(null);
     setModalDeptFilter('All');
     setModalSearchTerm('');
-    // Prefill with 6 vehicles rows
+    // Prefill with 1 vehicle row
     setRows([
-      createEmptyRow(),
-      createEmptyRow(),
-      createEmptyRow(),
-      createEmptyRow(),
-      createEmptyRow(),
       createEmptyRow()
     ]);
     setIsModalOpen(true);
