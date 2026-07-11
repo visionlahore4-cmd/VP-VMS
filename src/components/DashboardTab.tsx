@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppState, FuelEntry, MaintenanceEntry } from '../types';
+import { VisionPackagingLogo } from './VisionPackagingLogo';
 import { 
   Car, 
   Bike, 
@@ -103,14 +104,17 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state, onNavigate })
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Top Welcome Title Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl glass-panel border border-emerald-500/10 glow-emerald/5">
-        <div>
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-slate-100 tracking-tight">
-            Vision Packs Automobile
-          </h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Real-time control workspace for corporate fleet telemetry, fuel calculations, and allotment logs.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-2xl glass-panel border border-emerald-500/10 glow-emerald/5">
+        <div className="flex items-center gap-5">
+          <VisionPackagingLogo size="lg" showText={false} />
+          <div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-slate-100 tracking-tight">
+              Vision Food & Packaging Lahore
+            </h2>
+            <p className="text-sm text-slate-400 mt-1">
+              Real-time control workspace for corporate fleet telemetry, fuel calculations, and allotment logs.
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-3 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800 self-start md:self-auto font-mono text-xs">
           <Calendar className="w-4 h-4 text-emerald-400" />

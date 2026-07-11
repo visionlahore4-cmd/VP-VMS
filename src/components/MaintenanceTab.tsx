@@ -358,7 +358,7 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
                     className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
                   >
                     <option value="">Select Driver</option>
-                    {drivers.map(d => (
+                    {drivers.filter(d => !d.isSelfDrive).map(d => (
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
