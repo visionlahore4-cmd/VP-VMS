@@ -2,6 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, 
   Car, 
+  Bike,
   Users, 
   Key, 
   Fuel, 
@@ -23,6 +24,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'vehicles', label: 'Vehicles', icon: Car },
+    { id: 'bikes', label: 'Bikes / Motorcycles', icon: Bike },
     { id: 'drivers', label: 'Drivers', icon: Users },
     { id: 'allotments', label: 'Allotments', icon: Key },
     { id: 'fuel', label: 'Fuel Management', icon: Fuel },

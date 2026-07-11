@@ -20,6 +20,7 @@ import { FuelTab } from './components/FuelTab';
 import { MaintenanceTab } from './components/MaintenanceTab';
 import { TokenTaxTab } from './components/TokenTaxTab';
 import { DataManagementTab } from './components/DataManagementTab';
+import { BikesTab } from './components/BikesTab';
 import { InvoiceModal } from './components/InvoiceModal';
 
 import { Menu, User, Sparkles } from 'lucide-react';
@@ -59,7 +60,24 @@ export default function App() {
       }
 
       if (savedState) {
-        setState(JSON.parse(savedState));
+        const parsed = JSON.parse(savedState);
+        if (parsed.vehicles && parsed.vehicles.length < 10) {
+          const seededState: AppState = {
+            vehicles: DEMO_VEHICLES,
+            drivers: DEMO_DRIVERS,
+            allotments: DEMO_ALLOTMENTS,
+            fuelEntries: DEMO_FUEL_ENTRIES,
+            maintenanceEntries: DEMO_MAINTENANCE_ENTRIES,
+            tokenTaxEntries: DEMO_TOKEN_TAX_ENTRIES
+          };
+          setState(seededState);
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(seededState));
+          localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(seededState));
+          setHasBackup(true);
+          addToast('Upgraded database with the complete 25-vehicle real roster!', 'success');
+        } else {
+          setState(parsed);
+        }
       } else {
         // First load: seed with realistic default company demo datasets
         const seededState: AppState = {
@@ -387,6 +405,17 @@ export default function App() {
               onAddVehicle={handleAddVehicle}
               onEditVehicle={handleEditVehicle}
               onDeleteVehicle={handleDeleteVehicle}
+            />
+          )}
+
+          {currentTab === 'bikes' && (
+            <BikesTab
+              vehicles={state.vehicles}
+              drivers={state.drivers}
+              allotments={state.allotments}
+              onAddBike={handleAddVehicle}
+              onEditBike={handleEditVehicle}
+              onDeleteBike={handleDeleteVehicle}
             />
           )}
 
