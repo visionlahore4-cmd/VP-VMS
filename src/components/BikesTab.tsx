@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Vehicle, Driver, Allotment } from '../types';
-import { Plus, Search, Edit2, Trash2, Shield, Settings, Info, X, Bike, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Shield, Settings, Info, X, Bike, AlertCircle, CheckCircle, Briefcase, Calendar, Check } from 'lucide-react';
 
 interface BikesTabProps {
   vehicles: Vehicle[];
@@ -34,6 +34,18 @@ export const BikesTab: React.FC<BikesTabProps> = ({
   const [engineNo, setEngineNo] = useState('');
   const [insuranceStatus, setInsuranceStatus] = useState<Vehicle['insuranceStatus']>('Active');
 
+  // Screenshot 1 & 2 comprehensive manual fields for Motorcycles
+  const [modelYear, setModelYear] = useState('');
+  const [department, setDepartment] = useState<Vehicle['department']>('');
+  const [status, setStatus] = useState<Vehicle['status']>('Active');
+  const [assignedDriverId, setAssignedDriverId] = useState('');
+  const [designation, setDesignation] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+  const [allotmentDate, setAllotmentDate] = useState('');
+  const [insuranceExpiryDate, setInsuranceExpiryDate] = useState('');
+  const [sundarETag, setSundarETag] = useState(false);
+  const [environmentalTag, setEnvironmentalTag] = useState(false);
+
   const openAddModal = () => {
     setEditingBike(null);
     setVehicleNo('');
@@ -43,6 +55,19 @@ export const BikesTab: React.FC<BikesTabProps> = ({
     setChassisNo('');
     setEngineNo('');
     setInsuranceStatus('Active');
+
+    // Reset all comprehensive manual fields
+    setModelYear('');
+    setDepartment('');
+    setStatus('Active');
+    setAssignedDriverId('');
+    setDesignation('');
+    setEmployeeId('');
+    setAllotmentDate('');
+    setInsuranceExpiryDate('');
+    setSundarETag(false);
+    setEnvironmentalTag(false);
+
     setIsModalOpen(true);
   };
 
@@ -55,6 +80,19 @@ export const BikesTab: React.FC<BikesTabProps> = ({
     setChassisNo(bike.chassisNo);
     setEngineNo(bike.engineNo);
     setInsuranceStatus(bike.insuranceStatus);
+
+    // Populate all comprehensive manual fields
+    setModelYear(bike.modelYear || '');
+    setDepartment(bike.department || '');
+    setStatus(bike.status || 'Active');
+    setAssignedDriverId(bike.assignedDriverId || '');
+    setDesignation(bike.designation || '');
+    setEmployeeId(bike.employeeId || '');
+    setAllotmentDate(bike.allotmentDate || '');
+    setInsuranceExpiryDate(bike.insuranceExpiryDate || '');
+    setSundarETag(!!bike.sundarETag);
+    setEnvironmentalTag(!!bike.environmentalTag);
+
     setIsModalOpen(true);
   };
 
@@ -70,7 +108,19 @@ export const BikesTab: React.FC<BikesTabProps> = ({
       color: color.trim() || 'Red',
       chassisNo: chassisNo.trim().toUpperCase() || 'N/A',
       engineNo: engineNo.trim().toUpperCase() || 'N/A',
-      insuranceStatus
+      insuranceStatus,
+
+      // Screenshot 1 & 2 manual additional fields saved to Motorcycle/Vehicle object
+      modelYear: modelYear.trim(),
+      department: department || '',
+      status,
+      assignedDriverId,
+      designation: designation.trim(),
+      employeeId: employeeId.trim(),
+      allotmentDate,
+      insuranceExpiryDate,
+      sundarETag,
+      environmentalTag
     };
 
     if (editingBike) {
@@ -97,8 +147,16 @@ export const BikesTab: React.FC<BikesTabProps> = ({
   const totalBikesCount = allBikes.length;
   
   // Find allotted rider details for each bike
-  const getBikeAllotment = (bikeId: string) => {
-    const allotment = allotments.find(a => a.vehicleId === bikeId);
+  const getBikeAllotment = (bike: Vehicle) => {
+    if (bike.assignedDriverId) {
+      const rider = drivers.find(d => d.id === bike.assignedDriverId);
+      return {
+        riderName: rider ? rider.name : 'Unknown Rider',
+        department: bike.department || 'General',
+        date: bike.allotmentDate || '—'
+      };
+    }
+    const allotment = allotments.find(a => a.vehicleId === bike.id);
     if (!allotment) return null;
     const rider = drivers.find(d => d.id === allotment.driverId);
     return {
@@ -108,7 +166,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
     };
   };
 
-  const allottedBikesCount = allBikes.filter(b => allotments.some(a => a.vehicleId === b.id)).length;
+  const allottedBikesCount = allBikes.filter(b => !!b.assignedDriverId || allotments.some(a => a.vehicleId === b.id)).length;
   const unallottedBikesCount = totalBikesCount - allottedBikesCount;
 
   return (
@@ -193,7 +251,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredBikes.map((bike) => {
-            const riderInfo = getBikeAllotment(bike.id);
+            const riderInfo = getBikeAllotment(bike);
             return (
               <div 
                 key={bike.id}
@@ -234,12 +292,60 @@ export const BikesTab: React.FC<BikesTabProps> = ({
                 {/* Specs list */}
                 <div className="p-5 space-y-2.5 text-xs">
                   <div className="flex justify-between border-b border-slate-900/40 pb-1.5">
+                    <span className="text-slate-500">Model Year:</span>
+                    <span className="font-semibold text-slate-300">{bike.modelYear || '—'}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-900/40 pb-1.5">
+                    <span className="text-slate-500">Status:</span>
+                    <span className={`font-bold ${
+                      bike.status === 'Active' 
+                        ? 'text-emerald-400' 
+                        : bike.status === 'Maintenance' 
+                          ? 'text-amber-400' 
+                          : bike.status === 'Sold' 
+                            ? 'text-slate-400' 
+                            : 'text-red-400'
+                    }`}>{bike.status || 'Active'}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-900/40 pb-1.5">
                     <span className="text-slate-500">Chassis No:</span>
-                    <span className="font-mono text-slate-300 font-semibold">{bike.chassisNo}</span>
+                    <span className="font-mono text-slate-300 font-semibold">{bike.chassisNo || '—'}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-900/40 pb-1.5">
                     <span className="text-slate-500">Engine No:</span>
-                    <span className="font-mono text-slate-300 font-semibold">{bike.engineNo}</span>
+                    <span className="font-mono text-slate-300 font-semibold">{bike.engineNo || '—'}</span>
+                  </div>
+                  {bike.employeeId && (
+                    <div className="flex justify-between border-b border-slate-900/40 pb-1.5">
+                      <span className="text-slate-500">Employee ID:</span>
+                      <span className="font-semibold text-slate-300">{bike.employeeId}</span>
+                    </div>
+                  )}
+                  {bike.designation && (
+                    <div className="flex justify-between border-b border-slate-900/40 pb-1.5">
+                      <span className="text-slate-500">Designation:</span>
+                      <span className="font-semibold text-slate-300">{bike.designation}</span>
+                    </div>
+                  )}
+
+                  {/* E-Tag and Environmental tag ticks */}
+                  <div className="flex items-center gap-4 py-1 pb-1.5 border-b border-slate-900/40">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                      <span className="text-slate-500">Sundar E-Tag:</span>
+                      {bike.sundarETag ? (
+                        <span className="text-emerald-400">✓ Active</span>
+                      ) : (
+                        <span className="text-red-400">✗ Inactive</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                      <span className="text-slate-500">Env Tag:</span>
+                      {bike.environmentalTag ? (
+                        <span className="text-emerald-400">✓ Active</span>
+                      ) : (
+                        <span className="text-red-400">✗ Inactive</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Rider Allotment Row */}
@@ -296,142 +402,277 @@ export const BikesTab: React.FC<BikesTabProps> = ({
 
       {/* Add / Edit Motorcycle Modal overlay */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-slate-950 border border-slate-800/80 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-[#161a33]/95 border border-slate-800/80 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
             {/* Modal Title */}
-            <div className="p-6 border-b border-slate-900 flex items-center justify-between">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60 bg-[#121528]/80">
               <div>
                 <h3 className="font-display text-lg font-bold text-slate-100">
-                  {editingBike ? 'Edit Motorcycle Spec' : 'Add New Motorcycle'}
+                  {editingBike ? 'Edit Motorcycle Specifications' : 'Add New Motorcycle Unit'}
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Input registration data and technical metrics.
+                  Input registration data, rider details, and regulatory certificates.
                 </p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Plate Number */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Motorcycle Plate No. *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. LHO-26-4412"
-                  value={vehicleNo}
-                  onChange={(e) => setVehicleNo(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 placeholder-slate-600 transition-all"
-                />
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              
+              {/* Row 1: Plate Number & Model Year */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Motorcycle Plate No. *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. LHO-26-4412"
+                    value={vehicleNo}
+                    onChange={(e) => setVehicleNo(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Model Year *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 2024"
+                    value={modelYear}
+                    onChange={(e) => setModelYear(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Model Name */}
+              {/* Row 2: Model Name & Engine CC */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Model Name *</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Model Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Honda CD 70"
                     value={modelName}
                     onChange={(e) => setModelName(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 placeholder-slate-600 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
                   />
                 </div>
 
-                {/* Engine CC */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Engine Power (CC)</label>
-                  <select
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Engine Power (CC)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 70 CC"
                     value={engineCC}
                     onChange={(e) => setEngineCC(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
-                  >
-                    <option value="70 CC">70 CC</option>
-                    <option value="100 CC">100 CC</option>
-                    <option value="110 CC">110 CC</option>
-                    <option value="125 CC">125 CC</option>
-                    <option value="150 CC">150 CC</option>
-                  </select>
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Color */}
+              {/* Row 3: Color & Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Color</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Color</label>
                   <input
                     type="text"
                     placeholder="e.g. Red"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 placeholder-slate-600 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
                   />
                 </div>
 
-                {/* Insurance Status */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Insurance Status</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Status</label>
                   <select
-                    value={insuranceStatus}
-                    onChange={(e) => setInsuranceStatus(e.target.value as Vehicle['insuranceStatus'])}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as Vehicle['status'])}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
                   >
-                    <option value="Active">Active / Valid</option>
-                    <option value="Pending">Pending Audit</option>
-                    <option value="Expired">Expired</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Sold">Sold</option>
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Chassis Number */}
+              {/* Row 4: Department & Assigned Rider */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Chassis Number</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Department *</label>
+                  <select
+                    value={department}
+                    required
+                    onChange={(e) => setDepartment(e.target.value as Vehicle['department'])}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                  >
+                    <option value="">Select Department</option>
+                    <option value="General">General</option>
+                    <option value="SCM">SCM</option>
+                    <option value="Accounts">Accounts</option>
+                    <option value="Sale">Sale</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Production">Production</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Assigned Rider</label>
+                  <select
+                    value={assignedDriverId}
+                    onChange={(e) => setAssignedDriverId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                  >
+                    <option value="">— Unassigned —</option>
+                    {drivers.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 5: Chassis No & Engine No */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Chassis No</label>
                   <input
                     type="text"
                     placeholder="e.g. CD70-8812733"
                     value={chassisNo}
                     onChange={(e) => setChassisNo(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 placeholder-slate-600 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all font-mono placeholder-slate-600"
                   />
                 </div>
 
-                {/* Engine Number */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Engine Number</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Engine No</label>
                   <input
                     type="text"
                     placeholder="e.g. CD70E-481921"
                     value={engineNo}
                     onChange={(e) => setEngineNo(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 placeholder-slate-600 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all font-mono placeholder-slate-600"
                   />
                 </div>
               </div>
 
-              {/* Submit footer */}
-              <div className="pt-4 border-t border-slate-900 flex justify-end gap-3 mt-4">
+              {/* Row 6: Designation & Employee ID */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Designation</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Delivery Rider, Supervisor"
+                    value={designation}
+                    onChange={(e) => setDesignation(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Employee ID</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. EMP-101"
+                    value={employeeId}
+                    onChange={(e) => setEmployeeId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all placeholder-slate-600"
+                  />
+                </div>
+              </div>
+
+              {/* Row 7: Allotment Date & Insurance Expiry Date */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Allotment Date</label>
+                  <input
+                    type="date"
+                    value={allotmentDate}
+                    onChange={(e) => setAllotmentDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Insurance Expiry Date</label>
+                  <input
+                    type="date"
+                    value={insuranceExpiryDate}
+                    onChange={(e) => setInsuranceExpiryDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Row 8: Insurance Status */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Insurance Status</label>
+                <select
+                  value={insuranceStatus}
+                  onChange={(e) => setInsuranceStatus(e.target.value as Vehicle['insuranceStatus'])}
+                  className="w-full px-3.5 py-2.5 bg-[#1a1f38] text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-lg text-sm outline-none transition-all cursor-pointer"
+                >
+                  <option value="Active">Active / Valid</option>
+                  <option value="Pending">Pending Audit</option>
+                  <option value="Expired">Expired</option>
+                </select>
+              </div>
+
+              {/* Row 9: Token & Tags Section Header */}
+              <div className="pt-2 border-t border-slate-800/50">
+                <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-3">TOKEN & TAGS</h4>
+                <div className="flex flex-col sm:flex-row gap-6">
+                  {/* Sundar E-Tag Checkbox */}
+                  <label className="inline-flex items-center gap-3 text-xs text-slate-300 font-semibold cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={sundarETag}
+                      onChange={(e) => setSundarETag(e.target.checked)}
+                      className="w-4.5 h-4.5 bg-[#1a1f38] border border-slate-800 rounded focus:ring-0 text-indigo-600 accent-indigo-500 cursor-pointer"
+                    />
+                    SUNDAR E-TAG / TOKEN RENEWED
+                  </label>
+
+                  {/* Environmental Tag Checkbox */}
+                  <label className="inline-flex items-center gap-3 text-xs text-slate-300 font-semibold cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={environmentalTag}
+                      onChange={(e) => setEnvironmentalTag(e.target.checked)}
+                      className="w-4.5 h-4.5 bg-[#1a1f38] border border-slate-800 rounded focus:ring-0 text-indigo-600 accent-indigo-500 cursor-pointer"
+                    />
+                    ENVIRONMENTAL TAG
+                  </label>
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-5 border-t border-slate-800/60">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold rounded-xl text-xs cursor-pointer transition-colors"
+                  className="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-slate-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer shadow-lg shadow-emerald-500/10 transition-colors"
+                  className="px-6 py-2.5 text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-slate-950 rounded-xl transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 cursor-pointer"
                 >
                   {editingBike ? 'Save Changes' : 'Add Motorcycle'}
                 </button>
               </div>
+
             </form>
           </div>
         </div>
