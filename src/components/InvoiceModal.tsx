@@ -8,6 +8,7 @@ interface InvoiceModalProps {
   item: any; // FuelEntry or MaintenanceEntry
   vehicles: Vehicle[];
   drivers: Driver[];
+  serialNumber?: string;
   onClose: () => void;
 }
 
@@ -16,6 +17,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   item,
   vehicles,
   drivers,
+  serialNumber,
   onClose
 }) => {
   if (!type || !item) return null;
@@ -28,9 +30,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   };
 
   const isFuel = type === 'fuel';
-  const serialNo = isFuel
+  const defaultSerialNo = isFuel
     ? `FUEL-${item.id.split('-')[1]?.toLowerCase() || 'kocvvd'}`
     : `MNT-${item.id.split('-')[1]?.toLowerCase() || 'vvd98z'}`;
+  const serialNo = serialNumber || defaultSerialNo;
 
   // Automatically determine fuel type
   const getFuelType = (v: Vehicle | undefined) => {
@@ -124,7 +127,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <>
                         <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">DATE</th>
                         <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">VEHICLE NO#</th>
-                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">FUEL TYPE</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">VENDOR/PUMP</th>
                         <th className="py-3 px-4 text-center border-r border-blue-800 font-sans">LITRES</th>
                         <th className="py-3 px-4 text-right border-r border-blue-800 font-sans">RATE (PKR)</th>
                         <th className="py-3 px-4 text-right font-sans">AMOUNT (PKR)</th>
@@ -146,7 +149,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <tr className="bg-white">
                         <td className="py-3.5 px-4 font-medium border-r border-slate-200 font-mono text-xs">{item.date}</td>
                         <td className="py-3.5 px-4 font-bold text-[#154294] border-r border-slate-200 font-sans text-xs">{vehicle?.vehicleNo || 'N/A'}</td>
-                        <td className="py-3.5 px-4 font-semibold text-slate-600 border-r border-slate-200 uppercase font-sans text-xs">{fuelType}</td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-600 border-r border-slate-200 uppercase font-sans text-xs">
+                          <div>{item.pumpName || 'N/A'}</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">{fuelType}</div>
+                        </td>
                         <td className="py-3.5 px-4 text-center font-semibold border-r border-slate-200 font-mono text-xs">{Number(item.litres).toFixed(2)}</td>
                         <td className="py-3.5 px-4 text-right font-mono border-r border-slate-200 text-xs">{Number(item.ratePerLitre).toFixed(2)}</td>
                         <td className="py-3.5 px-4 text-right font-bold text-[#154294] font-mono text-xs">PKR {Number(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -189,15 +195,9 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             {/* Stamp block */}
             <div className="relative mt-8 flex justify-end h-12">
               <div className="absolute right-10 -top-2 z-10">
-                {item.status === 'Pending' ? (
-                  <div className="border-[3px] border-double border-[#e07026] text-[#e07026] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
-                    PENDING
-                  </div>
-                ) : (
-                  <div className="border-[3px] border-double border-[#059669] text-[#059669] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
-                    PAID
-                  </div>
-                )}
+                <div className="border-[3px] border-double border-[#059669] text-[#059669] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
+                  PAID
+                </div>
               </div>
             </div>
 
