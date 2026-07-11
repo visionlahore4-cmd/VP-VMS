@@ -23,6 +23,7 @@ import { DataManagementTab } from './components/DataManagementTab';
 import { BikesTab } from './components/BikesTab';
 import { BillsTab } from './components/BillsTab';
 import { InvoiceModal } from './components/InvoiceModal';
+import { LoginPortal } from './components/LoginPortal';
 
 import { Menu, User, Sparkles } from 'lucide-react';
 
@@ -39,6 +40,10 @@ const defaultEmptyState: AppState = {
 };
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('portal_authenticated') === 'true';
+  });
+
   const [state, setState] = useState<AppState>(defaultEmptyState);
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -49,6 +54,12 @@ export default function App() {
   const [activeInvoiceItem, setActiveInvoiceItem] = useState<any>(null);
 
   const { toasts, addToast, removeToast } = useToasts();
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('portal_authenticated');
+    setIsAuthenticated(false);
+    addToast('Logged out of secure administrative session.', 'info');
+  };
 
   // 1. Initial Load & Seed Population
   useEffect(() => {
@@ -349,6 +360,18 @@ export default function App() {
     vehicleId: alt.vehicleId
   }));
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex font-sans select-none antialiased overflow-x-hidden">
+        <Toast toasts={toasts} onClose={removeToast} />
+        <LoginPortal 
+          onLoginSuccess={() => setIsAuthenticated(true)} 
+          addToast={addToast} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-100 flex font-sans select-none antialiased overflow-x-hidden">
       
@@ -361,6 +384,7 @@ export default function App() {
         onTabChange={setCurrentTab} 
         isOpen={isSidebarOpen} 
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
+        onLogout={handleLogout}
       />
 
       {/* Main workspace container */}
@@ -510,6 +534,8 @@ export default function App() {
               onResetState={handleResetState}
               onRestoreBackup={handleRestoreBackup}
               hasBackup={hasBackup}
+              addToast={addToast}
+              onLogout={handleLogout}
             />
           )}
         </div>

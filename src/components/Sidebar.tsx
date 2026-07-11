@@ -11,7 +11,8 @@ import {
   Database,
   X,
   Gauge,
-  Receipt
+  Receipt,
+  LogOut
 } from 'lucide-react';
 import { VisionPackagingLogo } from './VisionPackagingLogo';
 
@@ -20,9 +21,10 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
   isOpen: boolean;
   onToggle: () => void;
+  onLogout?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpen, onToggle }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpen, onToggle, onLogout }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'vehicles', label: 'Vehicles', icon: Car },
@@ -99,13 +101,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
           </nav>
         </div>
 
-        {/* Footer info */}
-        <div className="pt-4 border-t border-slate-900/60 text-center">
-          <div className="flex justify-center items-center gap-1.5 text-xs text-slate-500">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-mono">Local Persistence Active</span>
+        {/* Footer info & Logout */}
+        <div className="pt-4 border-t border-slate-900/60 space-y-3.5">
+          {onLogout && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to log out of the portal?')) {
+                  onLogout();
+                }
+              }}
+              className="w-full flex items-center gap-4 px-4 py-2.5 rounded-md text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 border border-transparent hover:border-rose-500/10 cursor-pointer transition-all"
+            >
+              <LogOut className="w-4 h-4 opacity-70" />
+              <span>Log Out of Portal</span>
+            </button>
+          )}
+
+          <div className="text-center">
+            <div className="flex justify-center items-center gap-1.5 text-[10px] text-slate-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="font-mono">Local Persistence Active</span>
+            </div>
+            <p className="text-[9px] text-slate-600 mt-0.5 font-sans">© 2026 Vehicle Management Hub</p>
           </div>
-          <p className="text-[10px] text-slate-600 mt-1 font-sans">© 2026 Vehicle Management Hub</p>
         </div>
       </aside>
     </>

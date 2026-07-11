@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { AppState } from '../types';
 import { 
   Database, 
@@ -8,7 +8,12 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   RefreshCw,
-  Info 
+  Info,
+  Shield,
+  Eye,
+  EyeOff,
+  Save,
+  LogOut
 } from 'lucide-react';
 
 interface DataManagementTabProps {
@@ -17,6 +22,8 @@ interface DataManagementTabProps {
   onResetState: () => void;
   onRestoreBackup: () => void;
   hasBackup: boolean;
+  addToast?: (msg: string, type: 'success' | 'error' | 'info') => void;
+  onLogout?: () => void;
 }
 
 export const DataManagementTab: React.FC<DataManagementTabProps> = ({
@@ -24,9 +31,48 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
   onImportState,
   onResetState,
   onRestoreBackup,
-  hasBackup
+  hasBackup,
+  addToast,
+  onLogout
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Security Credentials Editing State
+  const [currentUsername, setCurrentUsername] = useState(localStorage.getItem('portal_username') || 'vision');
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showSecPassword, setShowSecPassword] = useState(false);
+
+  const handleUpdateCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim() && !newPassword.trim()) {
+      if (addToast) addToast('Please fill in a new username or password to update.', 'error');
+      else alert('Please fill in a new username or password to update.');
+      return;
+    }
+
+    if (newPassword && newPassword !== confirmPassword) {
+      if (addToast) addToast('Passwords do not match. Please verify confirmation field.', 'error');
+      else alert('Passwords do not match. Please verify confirmation field.');
+      return;
+    }
+
+    if (newUsername.trim()) {
+      localStorage.setItem('portal_username', newUsername.trim().toLowerCase());
+      setCurrentUsername(newUsername.trim().toLowerCase());
+    }
+    if (newPassword) {
+      localStorage.setItem('portal_password', newPassword);
+    }
+
+    setNewUsername('');
+    setNewPassword('');
+    setConfirmPassword('');
+
+    if (addToast) addToast('Security credentials updated successfully!', 'success');
+    else alert('Security credentials updated successfully!');
+  };
 
   // 1. Export entire localStorage state as dynamic JSON file download
   const handleExport = () => {
@@ -175,6 +221,92 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           </button>
         </div>
 
+      </div>
+
+      {/* Administrative Security Settings Card */}
+      <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="font-display font-bold text-slate-200 text-base flex items-center gap-2">
+            <Shield className="w-5 h-5 text-indigo-400" /> Administrative Security Settings
+          </h3>
+          {onLogout && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to log out of the portal?')) {
+                  onLogout();
+                }
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-xl border border-rose-500/20 text-xs font-bold transition-all cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" /> Sign Out
+            </button>
+          )}
+        </div>
+        
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Configure secure login credentials for this fleet portal. The default username is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">vision</code> and the default password is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">vision123</code>.
+        </p>
+
+        <form onSubmit={handleUpdateCredentials} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          {/* New Username */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              New Username (Current: <span className="text-indigo-400 font-mono lowercase">{currentUsername}</span>)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. vision"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+            />
+          </div>
+
+          {/* New Password */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              New Password
+            </label>
+            <div className="relative">
+              <input
+                type={showSecPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+              />
+              <button
+                type="button"
+                onClick={() => setShowSecPassword(!showSecPassword)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+              >
+                {showSecPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password & Save Button */}
+          <div className="space-y-1.5 flex gap-3">
+            <div className="flex-grow space-y-1.5">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Confirm Password
+              </label>
+              <input
+                type={showSecPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/10 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap self-end h-[41px]"
+            >
+              <Save className="w-3.5 h-3.5" /> Update
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Danger Zone */}
