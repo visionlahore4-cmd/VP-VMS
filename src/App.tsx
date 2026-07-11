@@ -219,6 +219,17 @@ export default function App() {
     addToast(`Logged refuel: PKR ${added.totalAmount.toLocaleString()} saved.`, 'success');
   };
 
+  const handleAddFuelEntries = (newFuels: Omit<FuelEntry, 'id'>[]) => {
+    const addedEntries = newFuels.map(f => ({
+      ...f,
+      id: `fuel-${Math.random().toString(36).substring(2, 9)}`
+    }));
+    const nextState = { ...state, fuelEntries: [...state.fuelEntries, ...addedEntries] };
+    updateAndSaveState(nextState);
+    const totalSum = addedEntries.reduce((sum, e) => sum + e.totalAmount, 0);
+    addToast(`Logged ${addedEntries.length} refuel slips: Total PKR ${totalSum.toLocaleString()} saved.`, 'success');
+  };
+
   const handleEditFuelEntry = (updatedFuel: FuelEntry) => {
     const nextState = {
       ...state,
@@ -446,7 +457,9 @@ export default function App() {
               fuelEntries={state.fuelEntries}
               vehicles={state.vehicles}
               drivers={state.drivers}
+              allotments={state.allotments}
               onAddFuelEntry={handleAddFuelEntry}
+              onAddFuelEntries={handleAddFuelEntries}
               onEditFuelEntry={handleEditFuelEntry}
               onDeleteFuelEntry={handleDeleteFuelEntry}
               onViewInvoice={handleViewInvoice}
