@@ -63,39 +63,19 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
         <div className="p-6 bg-slate-900/60 overflow-x-auto">
           
           {/* THE PAPER VOUCHER (Matches Screenshot EXACTLY) */}
-          <div id="printable-voucher" className="relative w-full min-w-[560px] bg-white text-slate-900 p-8 shadow-xl border border-slate-200 rounded-sm font-sans select-text">
+          <div id="printable-voucher" className="relative w-full min-w-[560px] bg-white text-slate-900 p-10 shadow-xl border border-slate-200 rounded-sm font-sans select-text">
             
-            {/* Stamp Overlay */}
-            {isFuel ? (
-              <div className="absolute right-16 bottom-36 border-4 border-double border-emerald-600/90 text-emerald-600/90 font-mono font-black text-lg uppercase tracking-[0.2em] px-6 py-2 rounded rotate-[-9deg] bg-emerald-50/20 select-none pointer-events-none z-10">
-                APPROVED
-              </div>
-            ) : (
-              (item as MaintenanceEntry).status === 'Pending' ? (
-                <div className="absolute right-16 bottom-36 border-4 border-double border-orange-500/90 text-orange-500/90 font-mono font-black text-lg uppercase tracking-[0.2em] px-6 py-2 rounded rotate-[-9deg] bg-orange-50/20 select-none pointer-events-none z-10">
-                  PENDING
-                </div>
-              ) : (
-                <div className="absolute right-16 bottom-36 border-4 border-double border-emerald-600/90 text-emerald-600/90 font-mono font-black text-lg uppercase tracking-[0.2em] px-6 py-2 rounded rotate-[-9deg] bg-emerald-50/20 select-none pointer-events-none z-10">
-                  APPROVED
-                </div>
-              )
-            )}
-
             {/* Voucher Top Header */}
             <div className="flex justify-between items-start">
               
               {/* Brand Logo & Department */}
-              <div className="flex items-center gap-3">
-                <VisionPackagingLogo layout="horizontal" size="sm" showText={false} light={true} />
+              <div className="flex items-center gap-4">
+                <VisionPackagingLogo layout="vertical" size="md" showText={false} light={true} />
                 <div>
-                  <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight uppercase">
-                    Vision Packaging
+                  <h1 className="text-2xl font-black text-[#154294] leading-[1.1] tracking-tight font-sans">
+                    Vision Food &<br />Packaging
                   </h1>
-                  <p className="text-[7px] font-bold text-rose-600 tracking-[0.2em] uppercase mt-0.5 leading-none">
-                    Safe Inside
-                  </p>
-                  <p className="text-[8px] font-black text-blue-900 tracking-wide uppercase mt-2">
+                  <p className="text-[9px] font-bold text-slate-500 tracking-[0.15em] uppercase mt-1.5 leading-none">
                     FLEET MANAGEMENT DEPARTMENT
                   </p>
                 </div>
@@ -103,10 +83,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
               {/* Voucher Details */}
               <div className="text-right">
-                <h2 className="text-sm font-black text-blue-900 uppercase tracking-widest">
+                <h2 className="text-sm font-black text-[#154294] uppercase tracking-wider font-sans">
                   VOUCHER DETAILS
                 </h2>
-                <div className="mt-1.5 space-y-0.5 text-xs text-slate-700">
+                <div className="mt-3 space-y-1 text-xs text-slate-700 font-sans">
                   <p><span className="font-semibold text-slate-500">Voucher No:</span> <span className="font-mono font-bold text-slate-900">{serialNo}</span></p>
                   <p><span className="font-semibold text-slate-500">Date Generated:</span> <span className="font-bold text-slate-900">{item.date}</span></p>
                 </div>
@@ -115,10 +95,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             </div>
 
             {/* Metadata Rows */}
-            <div className="mt-6 space-y-1 text-xs text-slate-700">
+            <div className="mt-6 space-y-1 text-xs text-slate-700 font-sans">
               <p className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-800">Company Name:</span>
-                <span>Vision Packs Automobile</span>
+                <span>Vision Food & Packaging</span>
               </p>
               <p className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-800">Report Type:</span>
@@ -133,29 +113,29 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             </div>
 
             {/* Horizontal Line Break */}
-            <hr className="my-4 border-t-2 border-slate-900" />
+            <div className="my-5 h-[2px] bg-slate-900"></div>
 
             {/* Main Voucher Table */}
             <div className="mt-4 border border-slate-200 rounded-sm overflow-hidden">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-blue-900 text-white font-bold uppercase tracking-wider text-[10px]">
+                  <tr className="bg-[#154294] text-white font-bold uppercase tracking-wide text-[10px]">
                     {isFuel ? (
                       <>
-                        <th className="py-2.5 px-4 text-left border-r border-blue-800">DATE</th>
-                        <th className="py-2.5 px-4 text-center border-r border-blue-800">VEHICLE NO#</th>
-                        <th className="py-2.5 px-4 text-center border-r border-blue-800">FUEL TYPE</th>
-                        <th className="py-2.5 px-4 text-center border-r border-blue-800">LITRES</th>
-                        <th className="py-2.5 px-4 text-right border-r border-blue-800">RATE (PKR)</th>
-                        <th className="py-2.5 px-4 text-right">AMOUNT (PKR)</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">DATE</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">VEHICLE NO#</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">FUEL TYPE</th>
+                        <th className="py-3 px-4 text-center border-r border-blue-800 font-sans">LITRES</th>
+                        <th className="py-3 px-4 text-right border-r border-blue-800 font-sans">RATE (PKR)</th>
+                        <th className="py-3 px-4 text-right font-sans">AMOUNT (PKR)</th>
                       </>
                     ) : (
                       <>
-                        <th className="py-2.5 px-4 text-left border-r border-blue-800">DATE</th>
-                        <th className="py-2.5 px-4 text-center border-r border-blue-800">VEHICLE NO#</th>
-                        <th className="py-2.5 px-4 text-left border-r border-blue-800">MAINTENANCE WORK</th>
-                        <th className="py-2.5 px-4 text-left border-r border-blue-800">VENDOR/WORKSHOP</th>
-                        <th className="py-2.5 px-4 text-right">TOTAL COST (PKR)</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">DATE</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">VEHICLE NO#</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">MAINTENANCE TYPE</th>
+                        <th className="py-3 px-4 text-left border-r border-blue-800 font-sans">WORKSHOP/VENDOR</th>
+                        <th className="py-3 px-4 text-right font-sans">TOTAL COST (PKR)</th>
                       </>
                     )}
                   </tr>
@@ -164,18 +144,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   {isFuel ? (
                     <>
                       <tr className="bg-white">
-                        <td className="py-3 px-4 font-medium border-r border-slate-100">{item.date}</td>
-                        <td className="py-3 px-4 text-center font-bold text-blue-900 border-r border-slate-100 font-mono">{vehicle?.vehicleNo || 'N/A'}</td>
-                        <td className="py-3 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 uppercase">{fuelType}</td>
-                        <td className="py-3 px-4 text-center font-semibold border-r border-slate-100 font-mono">{Number(item.litres).toFixed(2)}</td>
-                        <td className="py-3 px-4 text-right font-mono border-r border-slate-100">{Number(item.ratePerLitre).toFixed(2)}</td>
-                        <td className="py-3 px-4 text-right font-bold text-blue-900 font-mono">PKR {Number(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td className="py-3.5 px-4 font-medium border-r border-slate-200 font-mono text-xs">{item.date}</td>
+                        <td className="py-3.5 px-4 font-bold text-[#154294] border-r border-slate-200 font-sans text-xs">{vehicle?.vehicleNo || 'N/A'}</td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-600 border-r border-slate-200 uppercase font-sans text-xs">{fuelType}</td>
+                        <td className="py-3.5 px-4 text-center font-semibold border-r border-slate-200 font-mono text-xs">{Number(item.litres).toFixed(2)}</td>
+                        <td className="py-3.5 px-4 text-right font-mono border-r border-slate-200 text-xs">{Number(item.ratePerLitre).toFixed(2)}</td>
+                        <td className="py-3.5 px-4 text-right font-bold text-[#154294] font-mono text-xs">PKR {Number(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       </tr>
                       {/* Total row */}
-                      <tr className="bg-slate-50 font-bold border-t border-slate-300">
-                        <td colSpan={4} className="py-3 px-4 text-right uppercase tracking-wider text-slate-500 text-[10px]"></td>
-                        <td className="py-3 px-4 text-right uppercase tracking-wider text-slate-900 text-[10px] border-r border-slate-200">GRAND TOTAL</td>
-                        <td className="py-3 px-4 text-right text-blue-900 font-black font-mono text-xs">
+                      <tr className="bg-white font-bold border-t border-slate-200">
+                        <td colSpan={4} className="py-3.5 px-4 border-r border-slate-200"></td>
+                        <td className="py-3.5 px-4 text-right uppercase tracking-wider text-slate-900 text-[10px] font-sans font-bold border-r border-slate-200">GRAND TOTAL</td>
+                        <td className="py-3.5 px-4 text-right text-[#154294] font-black font-mono text-xs">
                           PKR {Number(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                       </tr>
@@ -183,20 +163,20 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   ) : (
                     <>
                       <tr className="bg-white">
-                        <td className="py-3 px-4 font-medium border-r border-slate-100">{item.date}</td>
-                        <td className="py-3 px-4 text-center font-bold text-blue-900 border-r border-slate-100 font-mono">{vehicle?.vehicleNo || 'N/A'}</td>
-                        <td className="py-3 px-4 border-r border-slate-100 font-semibold text-slate-700">{item.maintenanceType || 'Maintenance Work'}</td>
-                        <td className="py-3 px-4 border-r border-slate-100 font-semibold text-slate-700">
+                        <td className="py-3.5 px-4 font-medium border-r border-slate-200 font-mono text-xs">{item.date}</td>
+                        <td className="py-3.5 px-4 font-bold text-[#154294] border-r border-slate-200 font-sans text-xs">{vehicle?.vehicleNo || 'N/A'}</td>
+                        <td className="py-3.5 px-4 border-r border-slate-200 font-semibold text-slate-700 font-sans text-xs">{item.maintenanceType || 'Maintenance Work'}</td>
+                        <td className="py-3.5 px-4 border-r border-slate-200 font-semibold text-slate-700 font-sans text-xs">
                           <div>{item.workshopName}</div>
                           {item.vendorAddress && <div className="text-[10px] text-slate-500 mt-0.5">{item.vendorAddress}</div>}
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-blue-900 font-mono">PKR {Number(item.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td className="py-3.5 px-4 text-right font-bold text-[#154294] font-mono text-xs">PKR {Number(item.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       </tr>
                       {/* Total row */}
-                      <tr className="bg-slate-50 font-bold border-t border-slate-300">
-                        <td colSpan={3} className="py-3 px-4 text-right uppercase tracking-wider text-slate-500 text-[10px]"></td>
-                        <td className="py-3 px-4 text-right uppercase tracking-wider text-slate-900 text-[10px] border-r border-slate-200">GRAND TOTAL</td>
-                        <td className="py-3 px-4 text-right text-blue-900 font-black font-mono text-xs">
+                      <tr className="bg-white font-bold border-t border-slate-200">
+                        <td colSpan={3} className="py-3.5 px-4 border-r border-slate-200"></td>
+                        <td className="py-3.5 px-4 text-right uppercase tracking-wider text-slate-900 text-[10px] font-sans font-bold border-r border-slate-200">GRAND TOTAL</td>
+                        <td className="py-3.5 px-4 text-right text-[#154294] font-black font-mono text-xs">
                           PKR {Number(item.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                       </tr>
@@ -206,12 +186,27 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               </table>
             </div>
 
+            {/* Stamp block */}
+            <div className="relative mt-8 flex justify-end h-12">
+              <div className="absolute right-10 -top-2 z-10">
+                {item.status === 'Pending' ? (
+                  <div className="border-[3px] border-double border-[#e07026] text-[#e07026] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
+                    PENDING
+                  </div>
+                ) : (
+                  <div className="border-[3px] border-double border-[#059669] text-[#059669] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
+                    PAID
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Extra details for validation (e.g. Odometer / Pump or Next Service) */}
-            <div className="mt-5 grid grid-cols-2 gap-4 text-[10px] text-slate-500 border-t border-slate-100 pt-3">
+            <div className="mt-2 grid grid-cols-2 gap-4 text-[10px] text-slate-500 border-t border-slate-100 pt-3 font-mono">
               {isFuel ? (
                 <>
                   <p><span className="font-bold uppercase">Filling Pump Station:</span> <span className="font-medium text-slate-700">{item.pumpName}</span></p>
-                  <p className="text-right"><span className="font-bold uppercase">Odometer Log:</span> <span className="font-mono font-medium text-slate-700">{Number(item.odometerReading).toLocaleString()} km</span></p>
+                  <p className="text-right"><span className="font-bold uppercase">Odometer Log:</span> <span className="font-medium text-slate-700">{Number(item.odometerReading).toLocaleString()} km</span></p>
                 </>
               ) : (
                 <>
@@ -220,8 +215,8 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     {item.notes && <span className="block text-slate-600 mt-1"><span className="font-bold">NOTES:</span> {item.notes}</span>}
                   </p>
                   <p className="text-right">
-                    {item.currentReading !== undefined && <span className="block"><span className="font-bold uppercase">Odometer Current:</span> <span className="font-mono font-medium text-slate-700">{Number(item.currentReading).toLocaleString()} KM</span></span>}
-                    {item.nextReading !== undefined && <span className="block mt-0.5"><span className="font-bold uppercase">Next Service due (odometer):</span> <span className="font-mono font-semibold text-rose-600">{Number(item.nextReading).toLocaleString()} KM</span></span>}
+                    {item.currentReading !== undefined && <span className="block"><span className="font-bold uppercase">Odometer Current:</span> <span className="font-medium text-slate-700">{Number(item.currentReading).toLocaleString()} KM</span></span>}
+                    {item.nextReading !== undefined && <span className="block mt-0.5"><span className="font-bold uppercase">Next Service due (odometer):</span> <span className="font-semibold text-rose-600">{Number(item.nextReading).toLocaleString()} KM</span></span>}
                     {item.nextMaintenanceDate && <span className="block mt-0.5"><span className="font-bold uppercase">Next Scheduled Date:</span> <span className="font-medium text-slate-700">{item.nextMaintenanceDate}</span></span>}
                   </p>
                 </>
@@ -229,20 +224,20 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             </div>
 
             {/* Signature Area (Solid Black Lines centered, exactly matching screenshot) */}
-            <div className="mt-16 grid grid-cols-2 gap-16 text-xs text-slate-900 font-bold">
-              <div className="text-center">
-                <div className="w-40 mx-auto border-b-2 border-slate-900 mb-2"></div>
-                <p className="font-display">Admin Officer</p>
+            <div className="mt-16 flex justify-between px-10 text-xs text-slate-950 font-bold font-sans">
+              <div className="text-center w-48">
+                <div className="w-full border-b-2 border-slate-900 mb-2.5"></div>
+                <p className="font-semibold text-slate-900 text-xs">Admin Officer</p>
               </div>
-              <div className="text-center">
-                <div className="w-40 mx-auto border-b-2 border-slate-900 mb-2"></div>
-                <p className="font-display">Admin Manager</p>
+              <div className="text-center w-48">
+                <div className="w-full border-b-2 border-slate-900 mb-2.5"></div>
+                <p className="font-semibold text-slate-900 text-xs">Admin Manager</p>
               </div>
             </div>
 
             {/* Footer Location Block */}
-            <hr className="mt-12 mb-4 border-t border-slate-200" />
-            <div className="text-center text-[10px] text-slate-400 font-medium tracking-wide">
+            <div className="w-full h-[1px] bg-slate-200 mt-12 mb-4"></div>
+            <div className="text-center text-[10px] text-slate-400 font-medium tracking-wide font-sans">
               Vision Food & Packaging • Sunder Industrial Estate, Raiwind, Lahore
             </div>
 
