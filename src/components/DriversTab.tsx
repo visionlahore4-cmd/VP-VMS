@@ -21,6 +21,7 @@ export const DriversTab: React.FC<DriversTabProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('All');
+  const [driverTypeFilter, setDriverTypeFilter] = useState<'Company' | 'SelfDrive' | 'All'>('Company');
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,7 +88,12 @@ export const DriversTab: React.FC<DriversTabProps> = ({
     
     const matchesDept = selectedDept === 'All' || d.assignedDepartment === selectedDept;
     
-    return matchesSearch && matchesDept;
+    const matchesType = 
+      driverTypeFilter === 'All' ? true :
+      driverTypeFilter === 'Company' ? !d.isSelfDrive :
+      d.isSelfDrive;
+    
+    return matchesSearch && matchesDept && matchesType;
   });
 
   return (
@@ -107,6 +113,55 @@ export const DriversTab: React.FC<DriversTabProps> = ({
           className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Add Driver
+        </button>
+      </div>
+
+      {/* Driver Type Tabs */}
+      <div className="flex border-b border-slate-800/80 gap-1 overflow-x-auto pb-1 sm:pb-0">
+        <button
+          onClick={() => setDriverTypeFilter('Company')}
+          className={`px-5 py-2.5 font-display text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+            driverTypeFilter === 'Company'
+              ? 'border-emerald-500 text-emerald-400 font-bold bg-emerald-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Company Employed Drivers
+          <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+            driverTypeFilter === 'Company' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-500'
+          }`}>
+            {drivers.filter(d => !d.isSelfDrive).length}
+          </span>
+        </button>
+        <button
+          onClick={() => setDriverTypeFilter('SelfDrive')}
+          className={`px-5 py-2.5 font-display text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+            driverTypeFilter === 'SelfDrive'
+              ? 'border-emerald-500 text-emerald-400 font-bold bg-emerald-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Self-Drive Staff / Owners
+          <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+            driverTypeFilter === 'SelfDrive' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-500'
+          }`}>
+            {drivers.filter(d => d.isSelfDrive).length}
+          </span>
+        </button>
+        <button
+          onClick={() => setDriverTypeFilter('All')}
+          className={`px-5 py-2.5 font-display text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+            driverTypeFilter === 'All'
+              ? 'border-emerald-500 text-emerald-400 font-bold bg-emerald-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          All Roster
+          <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+            driverTypeFilter === 'All' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-500'
+          }`}>
+            {drivers.length}
+          </span>
         </button>
       </div>
 
