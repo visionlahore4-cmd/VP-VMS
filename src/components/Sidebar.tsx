@@ -56,9 +56,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
               </div>
               <div>
                 <h1 className="font-display text-lg font-bold text-white tracking-tight leading-none">
-                  VP <span className="text-emerald-400">VMS</span>
+                  Vision <span className="text-emerald-400">Packs</span>
                 </h1>
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-500/80">Vehicle Management</span>
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-500/80">Automobile Hub</span>
               </div>
             </div>
             

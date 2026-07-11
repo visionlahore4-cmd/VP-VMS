@@ -1,5 +1,5 @@
 {
-  "name": "VP Vehicle Management System",
+  "name": "Vision Packs Automobile",
   "description": "A comprehensive dark-themed dashboard to manage company vehicles, drivers, allotments, fuel logs, maintenance, token tax, and data backups.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

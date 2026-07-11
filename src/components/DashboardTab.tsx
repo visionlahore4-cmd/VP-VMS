@@ -106,7 +106,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state, onNavigate })
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl glass-panel border border-emerald-500/10 glow-emerald/5">
         <div>
           <h2 className="font-display text-2xl md:text-3xl font-bold text-slate-100 tracking-tight">
-            VP Vehicle Management System
+            Vision Packs Automobile
           </h2>
           <p className="text-sm text-slate-400 mt-1">
             Real-time control workspace for corporate fleet telemetry, fuel calculations, and allotment logs.
