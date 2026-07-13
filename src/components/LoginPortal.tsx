@@ -13,13 +13,16 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Retrieve configured credentials, fallback to defaults
+  const savedUsername = localStorage.getItem('portal_username') || 'admin';
+  const savedPassword = localStorage.getItem('portal_password') || 'admin123';
+
+  const savedUserUsername = localStorage.getItem('portal_user_username') || 'user';
+  const savedUserPassword = localStorage.getItem('portal_user_password') || 'user123';
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    // Retrieve configured credentials, fallback to defaults
-    const savedUsername = localStorage.getItem('portal_username') || 'admin';
-    const savedPassword = localStorage.getItem('portal_password') || 'admin123';
 
     if (username.trim() === '' || password.trim() === '') {
       setError('Please fill in all security fields.');
@@ -33,12 +36,15 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
     const isDefaultVision = enteredUser === 'vision' && enteredPass === 'vision123';
     const isSavedConfig = enteredUser === savedUsername.toLowerCase() && enteredPass === savedPassword;
 
+    const isDefaultUser = enteredUser === 'user' && enteredPass === 'user123';
+    const isSavedUserConfig = enteredUser === savedUserUsername.toLowerCase() && enteredPass === savedUserPassword;
+
     if (isDefaultAdmin || isDefaultVision || isSavedConfig) {
       sessionStorage.setItem('portal_authenticated', 'true');
       sessionStorage.setItem('portal_role', 'admin');
       addToast('Welcome back! Admin authentication approved.', 'success');
       onLoginSuccess('admin');
-    } else if (enteredUser === 'user' && enteredPass === 'user123') {
+    } else if (isDefaultUser || isSavedUserConfig) {
       sessionStorage.setItem('portal_authenticated', 'true');
       sessionStorage.setItem('portal_role', 'user');
       addToast('Welcome! Standard User authentication approved (View Only).', 'success');
@@ -82,13 +88,13 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
             <div className="grid grid-cols-2 gap-2 text-[11px] text-left">
               <div className="bg-emerald-500/5 border border-emerald-500/10 p-2 rounded-lg">
                 <span className="block font-bold text-emerald-400 mb-0.5">Admin (Full Access)</span>
-                <span className="block text-slate-400 font-mono">User: admin</span>
-                <span className="block text-slate-400 font-mono">Pass: admin123</span>
+                <span className="block text-slate-400 font-mono">User: {savedUsername}</span>
+                <span className="block text-slate-400 font-mono">Pass: {savedPassword}</span>
               </div>
               <div className="bg-blue-500/5 border border-blue-500/10 p-2 rounded-lg">
                 <span className="block font-bold text-blue-400 mb-0.5">User (View Only)</span>
-                <span className="block text-slate-400 font-mono">User: user</span>
-                <span className="block text-slate-400 font-mono">Pass: user123</span>
+                <span className="block text-slate-400 font-mono">User: {savedUserUsername}</span>
+                <span className="block text-slate-400 font-mono">Pass: {savedUserPassword}</span>
               </div>
             </div>
           </div>

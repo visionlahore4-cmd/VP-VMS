@@ -44,17 +44,24 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showSecPassword, setShowSecPassword] = useState(false);
 
+  // User (View-Only) Credentials Editing State
+  const [currentUserUsername, setCurrentUserUsername] = useState(localStorage.getItem('portal_user_username') || 'user');
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [confirmUserPassword, setConfirmUserPassword] = useState('');
+  const [showUserPassword, setShowUserPassword] = useState(false);
+
   const handleUpdateCredentials = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUsername.trim() && !newPassword.trim()) {
-      if (addToast) addToast('Please fill in a new username or password to update.', 'error');
-      else alert('Please fill in a new username or password to update.');
+      if (addToast) addToast('Please fill in a new admin username or password to update.', 'error');
+      else alert('Please fill in a new admin username or password to update.');
       return;
     }
 
     if (newPassword && newPassword !== confirmPassword) {
-      if (addToast) addToast('Passwords do not match. Please verify confirmation field.', 'error');
-      else alert('Passwords do not match. Please verify confirmation field.');
+      if (addToast) addToast('Admin passwords do not match. Please verify confirmation field.', 'error');
+      else alert('Admin passwords do not match. Please verify confirmation field.');
       return;
     }
 
@@ -70,8 +77,38 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
     setNewPassword('');
     setConfirmPassword('');
 
-    if (addToast) addToast('Security credentials updated successfully!', 'success');
-    else alert('Security credentials updated successfully!');
+    if (addToast) addToast('Admin security credentials updated successfully!', 'success');
+    else alert('Admin security credentials updated successfully!');
+  };
+
+  const handleUpdateUserCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserUsername.trim() && !newUserPassword.trim()) {
+      if (addToast) addToast('Please fill in a new user username or password to update.', 'error');
+      else alert('Please fill in a new user username or password to update.');
+      return;
+    }
+
+    if (newUserPassword && newUserPassword !== confirmUserPassword) {
+      if (addToast) addToast('User passwords do not match. Please verify confirmation field.', 'error');
+      else alert('User passwords do not match. Please verify confirmation field.');
+      return;
+    }
+
+    if (newUserUsername.trim()) {
+      localStorage.setItem('portal_user_username', newUserUsername.trim().toLowerCase());
+      setCurrentUserUsername(newUserUsername.trim().toLowerCase());
+    }
+    if (newUserPassword) {
+      localStorage.setItem('portal_user_password', newUserPassword);
+    }
+
+    setNewUserUsername('');
+    setNewUserPassword('');
+    setConfirmUserPassword('');
+
+    if (addToast) addToast('User security credentials updated successfully!', 'success');
+    else alert('User security credentials updated successfully!');
   };
 
   // 1. Export entire localStorage state as dynamic JSON file download
@@ -224,10 +261,10 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
       </div>
 
       {/* Administrative Security Settings Card */}
-      <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl glass-panel border border-slate-800 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-4">
           <h3 className="font-display font-bold text-slate-200 text-base flex items-center gap-2">
-            <Shield className="w-5 h-5 text-indigo-400" /> Administrative Security Settings
+            <Shield className="w-5 h-5 text-indigo-400" /> Portal Authentication Settings
           </h3>
           {onLogout && (
             <button
@@ -242,94 +279,197 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
             </button>
           )}
         </div>
-        
-        <p className="text-xs text-slate-400 leading-relaxed">
-          Configure secure login credentials for this fleet portal. The default username is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">admin</code> and the default password is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">admin123</code>.
-        </p>
 
-        <form onSubmit={handleUpdateCredentials} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          {/* New Username */}
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              New Username (Current: <span className="text-indigo-400 font-mono lowercase">{currentUsername}</span>)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. admin"
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
-            />
+        {/* SECTION 1: ADMIN CREDENTIALS */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Admin Credentials (Full Write & Manage Access)
+            </span>
           </div>
+          
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Configure secure login credentials for administrative access. The default username is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">admin</code> and the default password is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">admin123</code>.
+          </p>
 
-          {/* New Password */}
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              New Password
-            </label>
-            <div className="relative">
-              <input
-                type={showSecPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
-              />
-              <button
-                type="button"
-                onClick={() => setShowSecPassword(!showSecPassword)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
-              >
-                {showSecPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password & Save Button */}
-          <div className="space-y-1.5 flex gap-3">
-            <div className="flex-grow space-y-1.5">
+          <form onSubmit={handleUpdateCredentials} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            {/* New Username */}
+            <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Confirm Password
+                New Admin Username (Current: <span className="text-indigo-400 font-mono lowercase">{currentUsername}</span>)
               </label>
               <input
-                type={showSecPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                type="text"
+                placeholder="e.g. admin"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
               />
             </div>
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/10 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap self-end h-[41px]"
-            >
-              <Save className="w-3.5 h-3.5" /> Update
-            </button>
-          </div>
-        </form>
 
-        {/* Separator and Reset Admin Credentials */}
-        <div className="pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* New Password */}
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                New Admin Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showSecPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSecPassword(!showSecPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+                >
+                  {showSecPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password & Save Button */}
+            <div className="space-y-1.5 flex gap-3">
+              <div className="flex-grow space-y-1.5">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Confirm Admin Password
+                </label>
+                <input
+                  type={showSecPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/10 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap self-end h-[41px]"
+              >
+                <Save className="w-3.5 h-3.5" /> Update Admin
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <hr className="border-slate-800/40" />
+
+        {/* SECTION 2: USER CREDENTIALS */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              Standard User Credentials (View Only Access)
+            </span>
+          </div>
+          
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Configure secure login credentials for standard view-only access. The default username is <code className="bg-slate-900 px-1 py-0.5 rounded text-blue-400 font-mono">user</code> and the default password is <code className="bg-slate-900 px-1 py-0.5 rounded text-blue-400 font-mono">user123</code>.
+          </p>
+
+          <form onSubmit={handleUpdateUserCredentials} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            {/* New User Username */}
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                New User Username (Current: <span className="text-blue-400 font-mono lowercase">{currentUserUsername}</span>)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. user"
+                value={newUserUsername}
+                onChange={(e) => setNewUserUsername(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+              />
+            </div>
+
+            {/* New User Password */}
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                New User Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showUserPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowUserPassword(!showUserPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+                >
+                  {showUserPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm User Password & Save Button */}
+            <div className="space-y-1.5 flex gap-3">
+              <div className="flex-grow space-y-1.5">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Confirm User Password
+                </label>
+                <input
+                  type={showUserPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmUserPassword}
+                  onChange={(e) => setConfirmUserPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/10 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap self-end h-[41px]"
+              >
+                <Save className="w-3.5 h-3.5" /> Update User
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Separator and Reset Credentials */}
+        <div className="pt-4 border-t border-slate-800/60 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="space-y-1">
             <span className="text-xs font-semibold text-slate-300 block">Emergency Default Credential Recovery</span>
             <span className="text-[10px] text-slate-500 block leading-tight">
-              Reset the administrative login name back to "admin" and password back to "admin123".
+              Reset your credentials back to their pristine factory settings.
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm('Are you sure you want to reset Admin credentials back to default? (admin / admin123)')) {
-                localStorage.removeItem('portal_username');
-                localStorage.removeItem('portal_password');
-                setCurrentUsername('admin');
-                if (addToast) addToast('Admin credentials have been reset to admin / admin123.', 'success');
-              }
-            }}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-slate-800 hover:border-slate-700 text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
-          >
-            Reset Admin to Default
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to reset Admin credentials back to default? (admin / admin123)')) {
+                  localStorage.removeItem('portal_username');
+                  localStorage.removeItem('portal_password');
+                  setCurrentUsername('admin');
+                  if (addToast) addToast('Admin credentials have been reset to admin / admin123.', 'success');
+                }
+              }}
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-slate-800 hover:border-slate-700 text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+            >
+              Reset Admin Default
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to reset User credentials back to default? (user / user123)')) {
+                  localStorage.removeItem('portal_user_username');
+                  localStorage.removeItem('portal_user_password');
+                  setCurrentUserUsername('user');
+                  if (addToast) addToast('User credentials have been reset to user / user123.', 'success');
+                }
+              }}
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-slate-800 hover:border-slate-700 text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+            >
+              Reset User Default
+            </button>
+          </div>
         </div>
       </div>
 
