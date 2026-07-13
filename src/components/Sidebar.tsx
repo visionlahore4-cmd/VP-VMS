@@ -23,6 +23,7 @@ interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onLogout?: () => void;
+  onPortalLogout?: () => void;
   onAdminLoginTrigger?: () => void;
   isAdmin: boolean;
 }
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen, 
   onToggle, 
   onLogout, 
+  onPortalLogout,
   onAdminLoginTrigger, 
   isAdmin 
 }) => {
@@ -138,6 +140,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span>Admin Login</span>
               </button>
             )
+          )}
+
+          {onPortalLogout && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to log out of the portal? This will lock the application.')) {
+                  onPortalLogout();
+                }
+              }}
+              className="w-full flex items-center gap-4 px-4 py-2 bg-slate-950/50 hover:bg-slate-950/80 rounded-md text-xs font-semibold text-slate-400 hover:text-slate-300 border border-slate-800/60 cursor-pointer transition-all"
+            >
+              <LogOut className="w-4 h-4 opacity-50" />
+              <span>Sign Out of Portal</span>
+            </button>
           )}
 
           <div className="text-center">

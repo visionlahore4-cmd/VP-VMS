@@ -18,8 +18,8 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
     setError(null);
 
     // Retrieve configured credentials, fallback to defaults
-    const savedUsername = localStorage.getItem('portal_username') || 'vision';
-    const savedPassword = localStorage.getItem('portal_password') || 'vision123';
+    const savedUsername = localStorage.getItem('portal_username') || 'admin';
+    const savedPassword = localStorage.getItem('portal_password') || 'admin123';
 
     if (username.trim() === '' || password.trim() === '') {
       setError('Please fill in all security fields.');
@@ -27,13 +27,18 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
     }
 
     const enteredUser = username.trim().toLowerCase();
+    const enteredPass = password;
 
-    if (enteredUser === savedUsername.toLowerCase() && password === savedPassword) {
+    const isDefaultAdmin = enteredUser === 'admin' && enteredPass === 'admin123';
+    const isDefaultVision = enteredUser === 'vision' && enteredPass === 'vision123';
+    const isSavedConfig = enteredUser === savedUsername.toLowerCase() && enteredPass === savedPassword;
+
+    if (isDefaultAdmin || isDefaultVision || isSavedConfig) {
       sessionStorage.setItem('portal_authenticated', 'true');
       sessionStorage.setItem('portal_role', 'admin');
       addToast('Welcome back! Admin authentication approved.', 'success');
       onLoginSuccess('admin');
-    } else if (enteredUser === 'user' && password === 'user123') {
+    } else if (enteredUser === 'user' && enteredPass === 'user123') {
       sessionStorage.setItem('portal_authenticated', 'true');
       sessionStorage.setItem('portal_role', 'user');
       addToast('Welcome! Standard User authentication approved (View Only).', 'success');
@@ -48,7 +53,7 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
     <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center p-4 relative overflow-hidden font-sans select-none antialiased">
       {/* Abstract Glowing ambient circles for premium depth */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#154294]/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-rose-600/5 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in-95 duration-500">
         
@@ -70,10 +75,22 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
           </div>
 
           {/* Secure access notice */}
-          <div className="bg-[#154294]/10 border border-[#154294]/25 p-3 rounded-xl text-center">
-            <p className="text-[11px] font-medium text-slate-300 leading-normal">
-              Unauthorized access is strictly prohibited. Please sign in with your administrative credentials.
+          <div className="bg-slate-950/50 border border-slate-800 p-4 rounded-xl text-center space-y-2.5">
+            <p className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+              Portal Access Credentials
             </p>
+            <div className="grid grid-cols-2 gap-2 text-[11px] text-left">
+              <div className="bg-emerald-500/5 border border-emerald-500/10 p-2 rounded-lg">
+                <span className="block font-bold text-emerald-400 mb-0.5">Admin (Full Access)</span>
+                <span className="block text-slate-400 font-mono">User: admin</span>
+                <span className="block text-slate-400 font-mono">Pass: admin123</span>
+              </div>
+              <div className="bg-blue-500/5 border border-blue-500/10 p-2 rounded-lg">
+                <span className="block font-bold text-blue-400 mb-0.5">User (View Only)</span>
+                <span className="block text-slate-400 font-mono">User: user</span>
+                <span className="block text-slate-400 font-mono">Pass: user123</span>
+              </div>
+            </div>
           </div>
 
           {/* Login Form */}

@@ -41,7 +41,9 @@ const defaultEmptyState: AppState = {
 };
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('portal_authenticated') === 'true';
+  });
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
 
   const [userRole, setUserRole] = useState<'admin' | 'user'>(() => {
@@ -65,6 +67,14 @@ export default function App() {
     sessionStorage.removeItem('portal_role');
     setUserRole('user');
     addToast('Admin mode disabled.', 'info');
+  };
+
+  const handlePortalLogout = () => {
+    sessionStorage.removeItem('portal_authenticated');
+    sessionStorage.removeItem('portal_role');
+    setIsAuthenticated(false);
+    setUserRole('user');
+    addToast('Logged out of portal session successfully.', 'info');
   };
 
   // 1. Initial Load & Seed Population
@@ -394,6 +404,7 @@ export default function App() {
         isOpen={isSidebarOpen} 
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
         onLogout={handleLogout}
+        onPortalLogout={handlePortalLogout}
         onAdminLoginTrigger={() => setIsAdminLoginOpen(true)}
         isAdmin={isAdmin}
       />
