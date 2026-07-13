@@ -9,6 +9,7 @@ interface TokenTaxTabProps {
   onAddTokenTaxEntry: (entry: Omit<TokenTaxEntry, 'id'>) => void;
   onEditTokenTaxEntry: (entry: TokenTaxEntry) => void;
   onDeleteTokenTaxEntry: (id: string) => void;
+  isAdmin?: boolean;
 }
 
 export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
@@ -17,7 +18,8 @@ export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
   drivers,
   onAddTokenTaxEntry,
   onEditTokenTaxEntry,
-  onDeleteTokenTaxEntry
+  onDeleteTokenTaxEntry,
+  isAdmin = false
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
@@ -102,12 +104,14 @@ export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
             Track annual token tax payments, environmental fitness declarations, and toll road E-Tag validations.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" /> Issue Regulatory Log
-        </button>
+        {isAdmin && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Issue Regulatory Log
+          </button>
+        )}
       </div>
 
       {/* Filter Toolbar */}
@@ -229,24 +233,37 @@ export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
                       {/* Action buttons */}
                       <td className="py-4 px-4 text-right pr-6">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openEditModal(entry)}
-                            title="Edit Record"
-                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm('Remove this regulatory token record permanently?')) {
-                                onDeleteTokenTaxEntry(entry.id);
-                              }
-                            }}
-                            title="Delete Record"
-                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {isAdmin ? (
+                            <>
+                              <button
+                                onClick={() => openEditModal(entry)}
+                                title="Edit Record"
+                                className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (window.confirm('Remove this regulatory token record permanently?')) {
+                                    onDeleteTokenTaxEntry(entry.id);
+                                  }
+                                }}
+                                title="Delete Record"
+                                className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => openEditModal(entry)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
+                              title="View Details"
+                            >
+                              <Info className="w-3 h-3 text-indigo-400" />
+                              <span>View Info</span>
+                            </button>
+                          )}
                         </div>
                       </td>
 
@@ -267,7 +284,7 @@ export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
               <h3 className="font-display font-bold text-slate-100 text-lg">
-                {editingEntry ? 'Edit Regulatory Token Log' : 'Issue New Excise Token Log'}
+                {!isAdmin ? 'View Regulatory Token Log' : (editingEntry ? 'Edit Regulatory Token Log' : 'Issue New Excise Token Log')}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -280,81 +297,83 @@ export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               
-              {/* Vehicle Selection */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Choose Vehicle *</label>
-                <select
-                  required
-                  value={vehicleId}
-                  onChange={(e) => setVehicleId(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none cursor-pointer"
-                >
-                  {vehicles.map(v => (
-                    <option key={v.id} value={v.id}>
-                      {v.vehicleNo} — {v.modelName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Assigned Personnel */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Assigned Officer / Driver *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Muhammad Ahmed"
-                  value={assignedName}
-                  onChange={(e) => setAssignedName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
-                  list="driver-names-datalist"
-                />
-                <datalist id="driver-names-datalist">
-                  {drivers.map(d => (
-                    <option key={d.id} value={d.name} />
-                  ))}
-                </datalist>
-                <span className="text-[10px] text-slate-500 block mt-1">Select from driver roster or type custom officer name</span>
-              </div>
-
-              {/* Token Tax Excise status */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Excise Status</label>
-                <select
-                  value={tokenStatus}
-                  onChange={(e) => setTokenStatus(e.target.value as TokenTaxEntry['tokenStatus'])}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none cursor-pointer"
-                >
-                  <option value="Paid">Paid (Compliant)</option>
-                  <option value="Unpaid">Unpaid (Overdue)</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Start Date */}
+              <fieldset disabled={!isAdmin} className="space-y-4">
+                {/* Vehicle Selection */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Filing Date *</label>
-                  <input
-                    type="date"
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Choose Vehicle *</label>
+                  <select
                     required
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
-                  />
+                    value={vehicleId}
+                    onChange={(e) => setVehicleId(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none cursor-pointer"
+                  >
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.vehicleNo} — {v.modelName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Expiry Date */}
+                {/* Assigned Personnel */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Expiration Date *</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Assigned Officer / Driver *</label>
                   <input
-                    type="date"
+                    type="text"
                     required
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
+                    placeholder="e.g. Muhammad Ahmed"
+                    value={assignedName}
+                    onChange={(e) => setAssignedName(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                    list="driver-names-datalist"
                   />
+                  <datalist id="driver-names-datalist">
+                    {drivers.map(d => (
+                      <option key={d.id} value={d.name} />
+                    ))}
+                  </datalist>
+                  <span className="text-[10px] text-slate-500 block mt-1">Select from driver roster or type custom officer name</span>
                 </div>
-              </div>
+
+                {/* Token Tax Excise status */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Excise Status</label>
+                  <select
+                    value={tokenStatus}
+                    onChange={(e) => setTokenStatus(e.target.value as TokenTaxEntry['tokenStatus'])}
+                    className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none cursor-pointer"
+                  >
+                    <option value="Paid">Paid (Compliant)</option>
+                    <option value="Unpaid">Unpaid (Overdue)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Start Date */}
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Filing Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                    />
+                  </div>
+
+                  {/* Expiry Date */}
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Expiration Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-900 rounded-lg text-sm text-slate-200 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                    />
+                  </div>
+                </div>
+              </fieldset>
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -363,14 +382,16 @@ export const TokenTaxTab: React.FC<TokenTaxTabProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {isAdmin ? 'Cancel' : 'Close'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg transition-all glow-emerald cursor-pointer"
-                >
-                  {editingEntry ? 'Update Filing' : 'Save Excise Filing'}
-                </button>
+                {isAdmin && (
+                  <button
+                    type="submit"
+                    className="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg transition-all glow-emerald cursor-pointer"
+                  >
+                    {editingEntry ? 'Update Filing' : 'Save Excise Filing'}
+                  </button>
+                )}
               </div>
 
             </form>

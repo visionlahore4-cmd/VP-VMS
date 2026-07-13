@@ -24,6 +24,7 @@ import { BikesTab } from './components/BikesTab';
 import { BillsTab } from './components/BillsTab';
 import { InvoiceModal } from './components/InvoiceModal';
 import { LoginPortal } from './components/LoginPortal';
+import { AdminLoginModal } from './components/AdminLoginModal';
 
 import { Menu, User, Sparkles } from 'lucide-react';
 
@@ -40,9 +41,8 @@ const defaultEmptyState: AppState = {
 };
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('portal_authenticated') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
 
   const [userRole, setUserRole] = useState<'admin' | 'user'>(() => {
     return (sessionStorage.getItem('portal_role') as 'admin' | 'user') || 'user';
@@ -62,11 +62,9 @@ export default function App() {
   const { toasts, addToast, removeToast } = useToasts();
 
   const handleLogout = () => {
-    sessionStorage.removeItem('portal_authenticated');
     sessionStorage.removeItem('portal_role');
-    setIsAuthenticated(false);
     setUserRole('user');
-    addToast('Logged out of secure session.', 'info');
+    addToast('Logged out of Admin session. Switched to read-only mode.', 'info');
   };
 
   // 1. Initial Load & Seed Population
@@ -396,6 +394,7 @@ export default function App() {
         isOpen={isSidebarOpen} 
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
         onLogout={handleLogout}
+        onAdminLoginTrigger={() => setIsAdminLoginOpen(true)}
         isAdmin={isAdmin}
       />
 
@@ -530,6 +529,7 @@ export default function App() {
               onAddTokenTaxEntry={handleAddTokenTaxEntry}
               onEditTokenTaxEntry={handleEditTokenTaxEntry}
               onDeleteTokenTaxEntry={handleDeleteTokenTaxEntry}
+              isAdmin={isAdmin}
             />
           )}
 
@@ -590,6 +590,13 @@ export default function App() {
         onEditFuelEntry={handleEditFuelEntry}
         onEditMaintenanceEntry={handleEditMaintenanceEntry}
         isAdmin={isAdmin}
+      />
+
+      <AdminLoginModal
+        isOpen={isAdminLoginOpen}
+        onClose={() => setIsAdminLoginOpen(false)}
+        onLoginSuccess={() => setUserRole('admin')}
+        addToast={addToast}
       />
 
     </div>

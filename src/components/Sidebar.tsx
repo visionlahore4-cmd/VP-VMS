@@ -12,7 +12,8 @@ import {
   X,
   Gauge,
   Receipt,
-  LogOut
+  LogOut,
+  Lock
 } from 'lucide-react';
 import { VisionPackagingLogo } from './VisionPackagingLogo';
 
@@ -22,10 +23,19 @@ interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onLogout?: () => void;
+  onAdminLoginTrigger?: () => void;
   isAdmin: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpen, onToggle, onLogout, isAdmin }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  currentTab, 
+  onTabChange, 
+  isOpen, 
+  onToggle, 
+  onLogout, 
+  onAdminLoginTrigger, 
+  isAdmin 
+}) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'vehicles', label: 'Vehicles', icon: Car },
@@ -104,18 +114,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
 
         {/* Footer info & Logout */}
         <div className="pt-4 border-t border-slate-900/60 space-y-3.5">
-          {onLogout && (
-            <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to log out of the portal?')) {
-                  onLogout();
-                }
-              }}
-              className="w-full flex items-center gap-4 px-4 py-2.5 rounded-md text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 border border-transparent hover:border-rose-500/10 cursor-pointer transition-all"
-            >
-              <LogOut className="w-4 h-4 opacity-70" />
-              <span>Log Out of Portal</span>
-            </button>
+          {isAdmin ? (
+            onLogout && (
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to exit Admin Mode? This will lock modification access.')) {
+                    onLogout();
+                  }
+                }}
+                className="w-full flex items-center gap-4 px-4 py-2.5 rounded-md text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 border border-transparent hover:border-rose-500/10 cursor-pointer transition-all"
+              >
+                <LogOut className="w-4 h-4 opacity-70" />
+                <span>Exit Admin Mode</span>
+              </button>
+            )
+          ) : (
+            onAdminLoginTrigger && (
+              <button
+                onClick={onAdminLoginTrigger}
+                className="w-full flex items-center gap-4 px-4 py-2.5 rounded-md text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 border border-transparent hover:border-emerald-500/10 cursor-pointer transition-all animate-pulse"
+              >
+                <Lock className="w-4 h-4 opacity-70" />
+                <span>Admin Login</span>
+              </button>
+            )
           )}
 
           <div className="text-center">
