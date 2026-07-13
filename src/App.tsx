@@ -64,7 +64,7 @@ export default function App() {
   const handleLogout = () => {
     sessionStorage.removeItem('portal_role');
     setUserRole('user');
-    addToast('Logged out of Admin session. Switched to read-only mode.', 'info');
+    addToast('Admin mode disabled.', 'info');
   };
 
   // 1. Initial Load & Seed Population
@@ -429,7 +429,7 @@ export default function App() {
               </div>
               <div className="text-left">
                 <span className="text-xs font-bold text-slate-200 block leading-tight">
-                  {isAdmin ? 'Admin Terminal' : 'User Terminal (Read-Only)'}
+                  {isAdmin ? 'Admin Terminal' : 'Fleet Portal'}
                 </span>
                 <span className="text-[9px] text-slate-500 block">Head Office LHR</span>
               </div>
