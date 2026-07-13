@@ -27,8 +27,8 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     setError(null);
 
     // Retrieve configured credentials, fallback to defaults
-    const savedUsername = localStorage.getItem('portal_username') || 'vision';
-    const savedPassword = localStorage.getItem('portal_password') || 'vision123';
+    const savedUsername = localStorage.getItem('portal_username') || 'admin';
+    const savedPassword = localStorage.getItem('portal_password') || 'admin123';
 
     if (username.trim() === '' || password.trim() === '') {
       setError('Please fill in all security fields.');

@@ -38,7 +38,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Security Credentials Editing State
-  const [currentUsername, setCurrentUsername] = useState(localStorage.getItem('portal_username') || 'vision');
+  const [currentUsername, setCurrentUsername] = useState(localStorage.getItem('portal_username') || 'admin');
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -244,7 +244,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
         </div>
         
         <p className="text-xs text-slate-400 leading-relaxed">
-          Configure secure login credentials for this fleet portal. The default username is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">vision</code> and the default password is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">vision123</code>.
+          Configure secure login credentials for this fleet portal. The default username is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">admin</code> and the default password is <code className="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">admin123</code>.
         </p>
 
         <form onSubmit={handleUpdateCredentials} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -255,7 +255,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
             </label>
             <input
               type="text"
-              placeholder="e.g. vision"
+              placeholder="e.g. admin"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-900/60 text-slate-200 border border-slate-800 focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/50 rounded-xl text-xs outline-none transition-all placeholder-slate-600"
@@ -313,17 +313,17 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           <div className="space-y-1">
             <span className="text-xs font-semibold text-slate-300 block">Emergency Default Credential Recovery</span>
             <span className="text-[10px] text-slate-500 block leading-tight">
-              Reset the administrative login name back to "vision" and password back to "vision123".
+              Reset the administrative login name back to "admin" and password back to "admin123".
             </span>
           </div>
           <button
             type="button"
             onClick={() => {
-              if (window.confirm('Are you sure you want to reset Admin credentials back to default? (vision / vision123)')) {
+              if (window.confirm('Are you sure you want to reset Admin credentials back to default? (admin / admin123)')) {
                 localStorage.removeItem('portal_username');
                 localStorage.removeItem('portal_password');
-                setCurrentUsername('vision');
-                if (addToast) addToast('Admin credentials have been reset to vision / vision123.', 'success');
+                setCurrentUsername('admin');
+                if (addToast) addToast('Admin credentials have been reset to admin / admin123.', 'success');
               }
             }}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-slate-800 hover:border-slate-700 text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
