@@ -563,12 +563,22 @@ export default function App() {
       {/* Official Voucher Printable Invoice dialog modal overlay */}
       <InvoiceModal
         type={activeInvoiceType}
-        item={activeInvoiceItem}
+        item={
+          activeInvoiceType === 'fuel' && activeInvoiceItem
+            ? Array.isArray(activeInvoiceItem)
+              ? state.fuelEntries.filter(f => activeInvoiceItem.some(ai => ai.id === f.id))
+              : state.fuelEntries.find(f => f.id === activeInvoiceItem.id) || activeInvoiceItem
+            : activeInvoiceType === 'maintenance' && activeInvoiceItem
+            ? state.maintenanceEntries.find(m => m.id === activeInvoiceItem.id) || activeInvoiceItem
+            : null
+        }
         vehicles={state.vehicles}
         drivers={state.drivers}
         serialNumber={
           activeInvoiceType === 'fuel' && activeInvoiceItem
-            ? `FUEL-${String(state.fuelEntries.findIndex(e => e.id === activeInvoiceItem.id) + 1).padStart(2, '0')}`
+            ? Array.isArray(activeInvoiceItem)
+              ? `FUEL-BATCH-${activeInvoiceItem[0]?.id.split('-')[1]?.toLowerCase() || 'kocvvd'}`
+              : `FUEL-${String(state.fuelEntries.findIndex(e => e.id === activeInvoiceItem.id) + 1).padStart(2, '0')}`
             : activeInvoiceType === 'maintenance' && activeInvoiceItem
             ? `MNT-${String(state.maintenanceEntries.findIndex(e => e.id === activeInvoiceItem.id) + 1).padStart(2, '0')}`
             : undefined
@@ -577,6 +587,9 @@ export default function App() {
           setActiveInvoiceType(null);
           setActiveInvoiceItem(null);
         }}
+        onEditFuelEntry={handleEditFuelEntry}
+        onEditMaintenanceEntry={handleEditMaintenanceEntry}
+        isAdmin={isAdmin}
       />
 
     </div>

@@ -278,14 +278,12 @@ export const FuelTab: React.FC<FuelTabProps> = ({
             Log fuel receipts, track exact expenditures, and automatically evaluate transit fuel averages (km/L).
           </p>
         </div>
-        {isAdmin && (
-          <button
-            onClick={openAddModal}
-            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
-          >
-            <Plus className="w-4 h-4" /> Add Fuel Receipt
-          </button>
-        )}
+        <button
+          onClick={openAddModal}
+          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" /> Add Fuel Receipt
+        </button>
       </div>
 
       {/* Controls & Filter */}
@@ -436,27 +434,26 @@ export const FuelTab: React.FC<FuelTabProps> = ({
                             </button>
                           )}
 
+                          <button
+                            onClick={() => openEditModal(entry)}
+                            title="Edit Record"
+                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+
                           {isAdmin && (
-                            <>
-                              <button
-                                onClick={() => openEditModal(entry)}
-                                title="Edit Record"
-                                className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (window.confirm('Delete this fuel log? This will impact subsequent average calculations.')) {
-                                    onDeleteFuelEntry(entry.id);
-                                  }
-                                }}
-                                title="Delete Record"
-                                className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </>
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Delete this fuel log? This will impact subsequent average calculations.')) {
+                                  onDeleteFuelEntry(entry.id);
+                                }
+                              }}
+                              title="Delete Record"
+                              className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                       </td>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FuelEntry, MaintenanceEntry, Vehicle, Driver } from '../types';
-import { X, Printer, Shield } from 'lucide-react';
+import { X, Printer, Shield, Download, CheckCircle, Clock } from 'lucide-react';
 import { VisionPackagingLogo } from './VisionPackagingLogo';
 
 interface InvoiceModalProps {
@@ -10,6 +10,9 @@ interface InvoiceModalProps {
   drivers: Driver[];
   serialNumber?: string;
   onClose: () => void;
+  onEditFuelEntry?: (entry: FuelEntry) => void;
+  onEditMaintenanceEntry?: (entry: MaintenanceEntry) => void;
+  isAdmin?: boolean;
 }
 
 export const InvoiceModal: React.FC<InvoiceModalProps> = ({
@@ -18,7 +21,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   vehicles,
   drivers,
   serialNumber,
-  onClose
+  onClose,
+  onEditFuelEntry,
+  onEditMaintenanceEntry,
+  isAdmin = false
 }) => {
   if (!type || !item) return null;
 
@@ -31,6 +37,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   const vehicle = vehicles.find((v) => v.id === firstEntry?.vehicleId);
   const driver = firstEntry ? (drivers.find((d) => d.id === firstEntry.driverId) || (vehicle ? drivers.find((d) => d.id === vehicle.assignedDriverId) : null)) : null;
 
+  const isPending = isArray
+    ? fuelEntriesList.some(e => e.status === 'Pending')
+    : item?.status === 'Pending';
+
   const handlePrint = () => {
     window.print();
   };
@@ -41,6 +51,129 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
       : `FUEL-${firstEntry?.id.split('-')[1]?.toLowerCase() || 'kocvvd'}`
     : `MNT-${item.id.split('-')[1]?.toLowerCase() || 'vvd98z'}`;
   const serialNo = serialNumber || defaultSerialNo;
+
+  const handleToggleStatus = () => {
+    if (!type || !item) return;
+
+    if (type === 'fuel') {
+      if (isArray) {
+        const nextStatus = fuelEntriesList.some(e => e.status === 'Pending') ? 'Completed' : 'Pending';
+        fuelEntriesList.forEach(entry => {
+          if (onEditFuelEntry) {
+            onEditFuelEntry({
+              ...entry,
+              status: nextStatus
+            });
+          }
+        });
+      } else {
+        const nextStatus = item.status === 'Pending' ? 'Completed' : 'Pending';
+        if (onEditFuelEntry) {
+          onEditFuelEntry({
+            ...item,
+            status: nextStatus
+          });
+        }
+      }
+    } else if (type === 'maintenance') {
+      const nextStatus = item.status === 'Pending' ? 'Completed' : 'Pending';
+      if (onEditMaintenanceEntry) {
+        onEditMaintenanceEntry({
+          ...item,
+          status: nextStatus
+        });
+      }
+    }
+  };
+
+  const handleDownload = () => {
+    if (!type || !item) return;
+
+    let textContent = '';
+    if (isFuel) {
+      textContent = `
+=========================================
+      VISION FOOD & PACKAGING LAHORE
+             OFFICIAL RECEIPT
+=========================================
+Receipt ID:  ${serialNo}
+Date:        ${isArray ? firstEntry?.date : item.date}
+Type:        FUEL EXPENSES VOUCHER
+Status:      ${isPending ? 'PENDING / UNPAID' : 'PAID / CLEARED'}
+-----------------------------------------
+Company Name: Vision Food & Packaging
+Department:   ${vehicle?.department || 'General'}
+-----------------------------------------
+`;
+      if (isArray) {
+        textContent += `Vehicles in Batch: ${fuelEntriesList.length}\n`;
+        fuelEntriesList.forEach((e, idx) => {
+          const v = vehicles.find(veh => veh.id === e.vehicleId);
+          const d = drivers.find(drv => drv.id === e.driverId);
+          textContent += `\n[Entry ${idx + 1}]
+Date:       ${e.date}
+Vehicle:    ${v?.vehicleNo || 'N/A'} (${v?.modelName || 'N/A'})
+Driver:     ${d?.name || 'N/A'}
+Litres:     ${Number(e.litres).toFixed(2)} L
+Rate:       PKR ${Number(e.ratePerLitre).toFixed(2)}/L
+Amount:     PKR ${Number(e.totalAmount).toLocaleString()}
+Odometer:   ${Number(e.odometerReading).toLocaleString()} KM
+Pump Name:  ${e.pumpName || 'N/A'}
+-----------------------------------------`;
+        });
+      } else {
+        textContent += `Vehicle No:  ${vehicle?.vehicleNo || 'N/A'} (${vehicle?.modelName || 'N/A'})
+Driver/Rider:${driver?.name || 'N/A'}
+Pump Name:   ${firstEntry?.pumpName || 'N/A'}
+Litres:      ${Number(firstEntry?.litres).toFixed(2)} L
+Rate:        PKR ${Number(firstEntry?.ratePerLitre).toFixed(2)}/L
+Odometer:    ${Number(firstEntry?.odometerReading).toLocaleString()} KM
+-----------------------------------------`;
+      }
+      textContent += `\nTOTAL AMOUNT: PKR ${totalSum.toLocaleString()}
+=========================================
+        SAFE INSIDE - SUNDAR LAHORE
+=========================================
+`;
+    } else {
+      textContent = `
+=========================================
+      VISION FOOD & PACKAGING LAHORE
+             OFFICIAL RECEIPT
+=========================================
+Receipt ID:  ${serialNo}
+Date:        ${item.date}
+Type:        MAINTENANCE EXPENSES VOUCHER
+Status:      ${isPending ? 'PENDING / UNPAID' : 'PAID / CLEARED'}
+-----------------------------------------
+Vehicle No:  ${vehicle?.vehicleNo || 'N/A'} (${vehicle?.modelName || 'N/A'})
+Driver/Rider:${driver?.name || 'Workshop Job'}
+Workshop:    ${item.workshopName || 'N/A'}
+Type:        ${item.maintenanceType || 'N/A'}
+Address:     ${item.vendorAddress || 'N/A'}
+Odometer:    ${item.currentReading ? `${Number(item.currentReading).toLocaleString()} KM` : 'N/A'}
+-----------------------------------------
+Breakdown / Details:
+Parts Cost:  PKR ${Number(item.partsCost).toLocaleString()}
+Labor Cost:  PKR ${Number(item.laborCost).toLocaleString()}
+Notes:       ${item.notes || 'None'}
+Next Service: ${item.nextReading ? `${Number(item.nextReading).toLocaleString()} KM` : 'N/A'}
+-----------------------------------------
+TOTAL COST:   PKR ${Number(item.totalCost).toLocaleString()}
+=========================================
+        SAFE INSIDE - SUNDAR LAHORE
+=========================================
+`;
+    }
+
+    const element = document.createElement("a");
+    const file = new Blob([textContent], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `Invoice_${type}_${serialNo}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
 
   // Automatically determine fuel type
   const getFuelType = (v: Vehicle | undefined) => {
@@ -113,6 +246,12 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               <p className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-800">Report Type:</span>
                 <span>{isFuel ? (isArray ? `Fuel Expenses Voucher (Batch of ${fuelEntriesList.length} Vehicles)` : 'Fuel Expenses Voucher') : 'Maintenance Expenses Voucher'}</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="font-bold text-slate-800">Payment Status:</span>
+                <span className={`font-bold ${isPending ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  {isPending ? 'UNPAID / PENDING' : 'PAID / CLEARED'}
+                </span>
               </p>
               {driver && !isArray && (
                 <p className="flex items-center gap-1.5">
@@ -213,9 +352,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             {/* Stamp block */}
             <div className="relative mt-8 flex justify-end h-12">
               <div className="absolute right-10 -top-2 z-10">
-                <div className="border-[3px] border-double border-[#059669] text-[#059669] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
-                  PAID
-                </div>
+                {isPending ? (
+                  <div className="border-[3px] border-double border-rose-500 text-rose-500 font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
+                    UNPAID
+                  </div>
+                ) : (
+                  <div className="border-[3px] border-double border-[#059669] text-[#059669] font-mono font-black text-sm uppercase tracking-widest px-6 py-1.5 rounded rotate-[5deg] bg-white select-none pointer-events-none shadow-sm">
+                    PAID
+                  </div>
+                )}
               </div>
             </div>
 
@@ -274,19 +419,55 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
         </div>
 
         {/* Modal Action Buttons Footer */}
-        <div className="px-6 py-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-950/80">
+        <div className="px-6 py-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-950/80">
           <button
             onClick={onClose}
             className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
           >
             Close
           </button>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/20 font-sans transition-all active:scale-95"
-          >
-            <Printer className="w-4.5 h-4.5" /> Print Voucher Slip
-          </button>
+          
+          <div className="flex items-center gap-2.5">
+            {/* Toggle Status Button (Paid / Unpaid) */}
+            <button
+              onClick={handleToggleStatus}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 ${
+                isPending
+                  ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20'
+                  : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+              }`}
+            >
+              {isPending ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Mark as Paid</span>
+                </>
+              ) : (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>Mark as Unpaid (Pending)</span>
+                </>
+              )}
+            </button>
+
+            {/* Download Text Bill */}
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white rounded-xl transition-all cursor-pointer active:scale-95"
+            >
+              <Download className="w-4 h-4 text-emerald-400" />
+              <span>Download Receipt</span>
+            </button>
+
+            {/* Print Voucher */}
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-1.5 px-4.5 py-2.5 text-xs font-bold bg-[#154294] hover:bg-blue-600 text-white rounded-xl transition-all shadow-lg shadow-blue-900/25 cursor-pointer active:scale-95"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print Slip</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -339,6 +520,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
           }
           .border-emerald-600 {
             border-color: #059669 !important;
+          }
+          .text-rose-500 {
+            color: #f43f5e !important;
+          }
+          .border-rose-500 {
+            border-color: #f43f5e !important;
+          }
+          .text-rose-600 {
+            color: #e11d48 !important;
           }
           .text-orange-500 {
             color: #f97316 !important;
