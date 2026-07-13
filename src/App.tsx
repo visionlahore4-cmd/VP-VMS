@@ -44,6 +44,12 @@ export default function App() {
     return sessionStorage.getItem('portal_authenticated') === 'true';
   });
 
+  const [userRole, setUserRole] = useState<'admin' | 'user'>(() => {
+    return (sessionStorage.getItem('portal_role') as 'admin' | 'user') || 'user';
+  });
+
+  const isAdmin = userRole === 'admin';
+
   const [state, setState] = useState<AppState>(defaultEmptyState);
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -57,8 +63,10 @@ export default function App() {
 
   const handleLogout = () => {
     sessionStorage.removeItem('portal_authenticated');
+    sessionStorage.removeItem('portal_role');
     setIsAuthenticated(false);
-    addToast('Logged out of secure administrative session.', 'info');
+    setUserRole('user');
+    addToast('Logged out of secure session.', 'info');
   };
 
   // 1. Initial Load & Seed Population
@@ -365,7 +373,10 @@ export default function App() {
       <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex font-sans select-none antialiased overflow-x-hidden">
         <Toast toasts={toasts} onClose={removeToast} />
         <LoginPortal 
-          onLoginSuccess={() => setIsAuthenticated(true)} 
+          onLoginSuccess={(role) => {
+            setUserRole(role);
+            setIsAuthenticated(true);
+          }} 
           addToast={addToast} 
         />
       </div>
@@ -385,6 +396,7 @@ export default function App() {
         isOpen={isSidebarOpen} 
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
         onLogout={handleLogout}
+        isAdmin={isAdmin}
       />
 
       {/* Main workspace container */}
@@ -417,7 +429,9 @@ export default function App() {
                 <User className="w-3.5 h-3.5" />
               </div>
               <div className="text-left">
-                <span className="text-xs font-bold text-slate-200 block leading-tight">Admin Terminal</span>
+                <span className="text-xs font-bold text-slate-200 block leading-tight">
+                  {isAdmin ? 'Admin Terminal' : 'User Terminal (Read-Only)'}
+                </span>
                 <span className="text-[9px] text-slate-500 block">Head Office LHR</span>
               </div>
             </div>
@@ -442,6 +456,7 @@ export default function App() {
               onAddVehicle={handleAddVehicle}
               onEditVehicle={handleEditVehicle}
               onDeleteVehicle={handleDeleteVehicle}
+              isAdmin={isAdmin}
             />
           )}
 
@@ -453,6 +468,7 @@ export default function App() {
               onAddBike={handleAddVehicle}
               onEditBike={handleEditVehicle}
               onDeleteBike={handleDeleteVehicle}
+              isAdmin={isAdmin}
             />
           )}
 
@@ -464,6 +480,7 @@ export default function App() {
               onAddDriver={handleAddDriver}
               onEditDriver={handleEditDriver}
               onDeleteDriver={handleDeleteDriver}
+              isAdmin={isAdmin}
             />
           )}
 
@@ -489,6 +506,7 @@ export default function App() {
               onEditFuelEntry={handleEditFuelEntry}
               onDeleteFuelEntry={handleDeleteFuelEntry}
               onViewInvoice={handleViewInvoice}
+              isAdmin={isAdmin}
             />
           )}
 
@@ -527,7 +545,7 @@ export default function App() {
             />
           )}
 
-          {currentTab === 'database' && (
+          {currentTab === 'database' && isAdmin && (
             <DataManagementTab
               state={state}
               onImportState={handleImportState}
@@ -560,12 +578,6 @@ export default function App() {
           setActiveInvoiceItem(null);
         }}
       />
-
-      {/* Floating System Status Badge */}
-      <div className="fixed bottom-8 right-8 flex items-center gap-4 bg-emerald-500 text-white px-6 py-3 rounded-full shadow-2xl shadow-emerald-500/40 transform scale-90 border border-white/20 z-40 no-print">
-        <span className="text-sm font-bold">System Status: Optimal</span>
-        <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-      </div>
 
     </div>
   );

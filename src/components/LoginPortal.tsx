@@ -3,7 +3,7 @@ import { VisionPackagingLogo } from './VisionPackagingLogo';
 import { Lock, User, Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
 
 interface LoginPortalProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (role: 'admin' | 'user') => void;
   addToast: (msg: string, type: 'success' | 'error' | 'info') => void;
 }
 
@@ -26,10 +26,18 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
       return;
     }
 
-    if (username.trim().toLowerCase() === savedUsername.toLowerCase() && password === savedPassword) {
+    const enteredUser = username.trim().toLowerCase();
+
+    if (enteredUser === savedUsername.toLowerCase() && password === savedPassword) {
       sessionStorage.setItem('portal_authenticated', 'true');
-      addToast('Welcome back! Authentication approved.', 'success');
-      onLoginSuccess();
+      sessionStorage.setItem('portal_role', 'admin');
+      addToast('Welcome back! Admin authentication approved.', 'success');
+      onLoginSuccess('admin');
+    } else if (enteredUser === 'user' && password === 'user123') {
+      sessionStorage.setItem('portal_authenticated', 'true');
+      sessionStorage.setItem('portal_role', 'user');
+      addToast('Welcome! Standard User authentication approved (View Only).', 'success');
+      onLoginSuccess('user');
     } else {
       setError('Invalid username or password. Please try again.');
       addToast('Login Failed: Access Denied.', 'error');
@@ -128,22 +136,6 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess, addToa
               Sign In to Portal
             </button>
           </form>
-
-          {/* Reset password button */}
-          <div className="pt-2 text-center">
-            <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to reset credentials to the default? (vision / vision123)')) {
-                  localStorage.removeItem('portal_username');
-                  localStorage.removeItem('portal_password');
-                  addToast('Credentials reset to default.', 'info');
-                }
-              }}
-              className="text-[10px] font-bold text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-wider"
-            >
-              Forgot Password? Reset to Default
-            </button>
-          </div>
 
         </div>
 

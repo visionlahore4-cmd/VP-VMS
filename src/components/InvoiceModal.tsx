@@ -22,16 +22,23 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
 }) => {
   if (!type || !item) return null;
 
-  const vehicle = vehicles.find((v) => v.id === item.vehicleId);
-    const driver = drivers.find((d) => d.id === item.driverId) || (vehicle ? drivers.find((d) => d.id === vehicle.assignedDriverId) : null);
+  const isFuel = type === 'fuel';
+  const isArray = Array.isArray(item);
+  const fuelEntriesList: FuelEntry[] = isArray ? (item as FuelEntry[]) : [item as FuelEntry];
+  const firstEntry = fuelEntriesList[0];
+  const totalSum = fuelEntriesList.reduce((acc, curr) => acc + Number(curr.totalAmount || 0), 0);
+
+  const vehicle = vehicles.find((v) => v.id === firstEntry?.vehicleId);
+  const driver = firstEntry ? (drivers.find((d) => d.id === firstEntry.driverId) || (vehicle ? drivers.find((d) => d.id === vehicle.assignedDriverId) : null)) : null;
 
   const handlePrint = () => {
     window.print();
   };
 
-  const isFuel = type === 'fuel';
   const defaultSerialNo = isFuel
-    ? `FUEL-${item.id.split('-')[1]?.toLowerCase() || 'kocvvd'}`
+    ? isArray
+      ? `FUEL-BATCH-${firstEntry?.id.split('-')[1]?.toLowerCase() || 'kocvvd'}`
+      : `FUEL-${firstEntry?.id.split('-')[1]?.toLowerCase() || 'kocvvd'}`
     : `MNT-${item.id.split('-')[1]?.toLowerCase() || 'vvd98z'}`;
   const serialNo = serialNumber || defaultSerialNo;
 
@@ -91,7 +98,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 </h2>
                 <div className="mt-3 space-y-1 text-xs text-slate-700 font-sans">
                   <p><span className="font-semibold text-slate-500">Voucher No:</span> <span className="font-mono font-bold text-slate-900">{serialNo}</span></p>
-                  <p><span className="font-semibold text-slate-500">Date Generated:</span> <span className="font-bold text-slate-900">{item.date}</span></p>
+                  <p><span className="font-semibold text-slate-500">Date Generated:</span> <span className="font-bold text-slate-900">{isArray ? firstEntry?.date : item.date}</span></p>
                 </div>
               </div>
 
@@ -105,9 +112,9 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               </p>
               <p className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-800">Report Type:</span>
-                <span>{isFuel ? 'Fuel Expenses Voucher' : 'Maintenance Expenses Voucher'}</span>
+                <span>{isFuel ? (isArray ? `Fuel Expenses Voucher (Batch of ${fuelEntriesList.length} Vehicles)` : 'Fuel Expenses Voucher') : 'Maintenance Expenses Voucher'}</span>
               </p>
-              {driver && (
+              {driver && !isArray && (
                 <p className="flex items-center gap-1.5">
                   <span className="font-bold text-slate-800">Driver Assignment:</span>
                   <span>{driver.name} {driver.employeeId ? `(ID: ${driver.employeeId})` : ''} — {driver.designation || 'Active Driver'}</span>
@@ -146,23 +153,34 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 <tbody className="divide-y divide-slate-200 text-slate-800">
                   {isFuel ? (
                     <>
-                      <tr className="bg-white">
-                        <td className="py-3.5 px-4 font-medium border-r border-slate-200 font-mono text-xs">{item.date}</td>
-                        <td className="py-3.5 px-4 font-bold text-[#154294] border-r border-slate-200 font-sans text-xs">{vehicle?.vehicleNo || 'N/A'}</td>
-                        <td className="py-3.5 px-4 font-semibold text-slate-600 border-r border-slate-200 uppercase font-sans text-xs">
-                          <div>{item.pumpName || 'N/A'}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{fuelType}</div>
-                        </td>
-                        <td className="py-3.5 px-4 text-center font-semibold border-r border-slate-200 font-mono text-xs">{Number(item.litres).toFixed(2)}</td>
-                        <td className="py-3.5 px-4 text-right font-mono border-r border-slate-200 text-xs">{Number(item.ratePerLitre).toFixed(2)}</td>
-                        <td className="py-3.5 px-4 text-right font-bold text-[#154294] font-mono text-xs">PKR {Number(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                      </tr>
+                      {fuelEntriesList.map((entry, idx) => {
+                        const entryVehicle = vehicles.find((v) => v.id === entry.vehicleId);
+                        const entryDriver = drivers.find((d) => d.id === entry.driverId) || (entryVehicle ? drivers.find((d) => d.id === entryVehicle.assignedDriverId) : null);
+                        const entryFuelType = getFuelType(entryVehicle);
+                        
+                        return (
+                          <tr key={entry.id || idx} className="bg-white">
+                            <td className="py-3.5 px-4 font-medium border-r border-slate-200 font-mono text-xs">{entry.date}</td>
+                            <td className="py-3.5 px-4 font-bold text-[#154294] border-r border-slate-200 font-sans text-xs">
+                              <div>{entryVehicle?.vehicleNo || 'N/A'}</div>
+                              {entryDriver && <div className="text-[10px] text-slate-500 font-medium font-sans mt-0.5">{entryDriver.name}</div>}
+                            </td>
+                            <td className="py-3.5 px-4 font-semibold text-slate-600 border-r border-slate-200 uppercase font-sans text-xs">
+                              <div>{entry.pumpName || 'N/A'}</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">{entryFuelType}</div>
+                            </td>
+                            <td className="py-3.5 px-4 text-center font-semibold border-r border-slate-200 font-mono text-xs">{Number(entry.litres).toFixed(2)}</td>
+                            <td className="py-3.5 px-4 text-right font-mono border-r border-slate-200 text-xs">{Number(entry.ratePerLitre).toFixed(2)}</td>
+                            <td className="py-3.5 px-4 text-right font-bold text-[#154294] font-mono text-xs">PKR {Number(entry.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                          </tr>
+                        );
+                      })}
                       {/* Total row */}
                       <tr className="bg-white font-bold border-t border-slate-200">
                         <td colSpan={4} className="py-3.5 px-4 border-r border-slate-200"></td>
                         <td className="py-3.5 px-4 text-right uppercase tracking-wider text-slate-900 text-[10px] font-sans font-bold border-r border-slate-200">GRAND TOTAL</td>
                         <td className="py-3.5 px-4 text-right text-[#154294] font-black font-mono text-xs">
-                          PKR {Number(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          PKR {totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                       </tr>
                     </>
@@ -205,8 +223,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             <div className="mt-2 grid grid-cols-2 gap-4 text-[10px] text-slate-500 border-t border-slate-100 pt-3 font-mono">
               {isFuel ? (
                 <>
-                  <p><span className="font-bold uppercase">Filling Pump Station:</span> <span className="font-medium text-slate-700">{item.pumpName}</span></p>
-                  <p className="text-right"><span className="font-bold uppercase">Odometer Log:</span> <span className="font-medium text-slate-700">{Number(item.odometerReading).toLocaleString()} km</span></p>
+                  <p>
+                    <span className="font-bold uppercase">Filling Pump Station:</span>{' '}
+                    <span className="font-medium text-slate-700">
+                      {isArray ? `${fuelEntriesList.length} Vehicles (Batch)` : firstEntry?.pumpName}
+                    </span>
+                  </p>
+                  <p className="text-right">
+                    <span className="font-bold uppercase">Total Litres:</span>{' '}
+                    <span className="font-medium text-slate-700">
+                      {fuelEntriesList.reduce((sum, e) => sum + e.litres, 0).toFixed(2)} L
+                    </span>
+                  </p>
                 </>
               ) : (
                 <>

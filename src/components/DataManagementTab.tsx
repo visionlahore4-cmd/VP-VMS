@@ -307,6 +307,30 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
             </button>
           </div>
         </form>
+
+        {/* Separator and Reset Admin Credentials */}
+        <div className="pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-300 block">Emergency Default Credential Recovery</span>
+            <span className="text-[10px] text-slate-500 block leading-tight">
+              Reset the administrative login name back to "vision" and password back to "vision123".
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Are you sure you want to reset Admin credentials back to default? (vision / vision123)')) {
+                localStorage.removeItem('portal_username');
+                localStorage.removeItem('portal_password');
+                setCurrentUsername('vision');
+                if (addToast) addToast('Admin credentials have been reset to vision / vision123.', 'success');
+              }
+            }}
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-slate-800 hover:border-slate-700 text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+          >
+            Reset Admin to Default
+          </button>
+        </div>
       </div>
 
       {/* Danger Zone */}

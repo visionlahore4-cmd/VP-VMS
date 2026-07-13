@@ -9,6 +9,7 @@ interface BikesTabProps {
   onAddBike: (bike: Omit<Vehicle, 'id'>) => void;
   onEditBike: (bike: Vehicle) => void;
   onDeleteBike: (id: string) => void;
+  isAdmin?: boolean;
 }
 
 export const BikesTab: React.FC<BikesTabProps> = ({
@@ -17,7 +18,8 @@ export const BikesTab: React.FC<BikesTabProps> = ({
   allotments,
   onAddBike,
   onEditBike,
-  onDeleteBike
+  onDeleteBike,
+  isAdmin = false
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -192,12 +194,14 @@ export const BikesTab: React.FC<BikesTabProps> = ({
             Register and monitor localized two-wheeler delivery riders, specifications, and field allotments.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" /> Add Motorcycle
-        </button>
+        {isAdmin && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Motorcycle
+          </button>
+        )}
       </div>
 
       {/* Stats row */}
@@ -385,24 +389,36 @@ export const BikesTab: React.FC<BikesTabProps> = ({
                 <div className="px-5 py-3.5 bg-slate-950/50 border-t border-slate-900/80 flex items-center justify-between gap-2">
                   <span className="text-[9px] text-slate-500 uppercase tracking-wide">Ref. ID: {bike.id}</span>
                   <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => openEditModal(bike)}
-                      className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg border border-slate-800 cursor-pointer transition-colors"
-                      title="Edit Specifications"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm(`Are you sure you want to permanently delete motorcycle ${bike.vehicleNo}?`)) {
-                          onDeleteBike(bike.id);
-                        }
-                      }}
-                      className="p-2 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 rounded-lg border border-rose-500/10 hover:border-rose-500/20 cursor-pointer transition-colors"
-                      title="Remove from Fleet"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {isAdmin ? (
+                      <>
+                        <button
+                          onClick={() => openEditModal(bike)}
+                          className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg border border-slate-800 cursor-pointer transition-colors"
+                          title="Edit Specifications"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to permanently delete motorcycle ${bike.vehicleNo}?`)) {
+                              onDeleteBike(bike.id);
+                            }
+                          }}
+                          className="p-2 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 rounded-lg border border-rose-500/10 hover:border-rose-500/20 cursor-pointer transition-colors"
+                          title="Remove from Fleet"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => openEditModal(bike)}
+                        className="px-3 py-1.5 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1"
+                      >
+                        <Info className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>View Specs</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -434,7 +450,8 @@ export const BikesTab: React.FC<BikesTabProps> = ({
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-6">
+              <fieldset disabled={!isAdmin} className="space-y-5">
               
               {/* Row 1: Plate Number & Model Year */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -680,6 +697,7 @@ export const BikesTab: React.FC<BikesTabProps> = ({
                   </label>
                 </div>
               </div>
+              </fieldset>
 
               {/* Form Actions */}
               <div className="flex justify-end gap-3 pt-5 border-t border-slate-800/60">
@@ -688,14 +706,16 @@ export const BikesTab: React.FC<BikesTabProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-slate-800"
                 >
-                  Cancel
+                  {isAdmin ? 'Cancel' : 'Close'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-slate-950 rounded-xl transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 cursor-pointer"
-                >
-                  {editingBike ? 'Save Changes' : 'Add Motorcycle'}
-                </button>
+                {isAdmin && (
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-slate-950 rounded-xl transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 cursor-pointer"
+                  >
+                    {editingBike ? 'Save Changes' : 'Add Motorcycle'}
+                  </button>
+                )}
               </div>
 
             </form>

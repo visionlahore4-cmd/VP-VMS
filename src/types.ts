@@ -53,6 +53,7 @@ export interface FuelEntry {
   pumpName: string;
   calculatedAverage?: number; // km/L, calculated relative to previous odometer reading
   status?: 'Pending' | 'Completed';
+  batchId?: string;
 }
 
 export interface MaintenanceEntry {

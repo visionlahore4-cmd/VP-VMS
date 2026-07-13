@@ -9,6 +9,7 @@ interface DriversTabProps {
   onDeleteDriver: (id: string) => void;
   allotments: { driverId: string; vehicleId: string }[];
   vehicles: { id: string; vehicleNo: string }[];
+  isAdmin?: boolean;
 }
 
 export const DriversTab: React.FC<DriversTabProps> = ({
@@ -17,7 +18,8 @@ export const DriversTab: React.FC<DriversTabProps> = ({
   onEditDriver,
   onDeleteDriver,
   allotments,
-  vehicles
+  vehicles,
+  isAdmin = false
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('All');
@@ -108,12 +110,14 @@ export const DriversTab: React.FC<DriversTabProps> = ({
             Maintain driver license details, compliance expiry dates, and department assignments.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" /> Add Driver
-        </button>
+        {isAdmin && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Driver
+          </button>
+        )}
       </div>
 
       {/* Driver Type Tabs */}
@@ -299,24 +303,37 @@ export const DriversTab: React.FC<DriversTabProps> = ({
                       {/* Actions */}
                       <td className="py-4 px-4 text-right pr-6">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openEditModal(driver)}
-                            title="Edit Driver"
-                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to delete driver ${driver.name}? This will remove associated allotments.`)) {
-                                onDeleteDriver(driver.id);
-                              }
-                            }}
-                            title="Delete Driver"
-                            className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {isAdmin ? (
+                            <>
+                              <button
+                                onClick={() => openEditModal(driver)}
+                                title="Edit Driver"
+                                className="p-1.5 bg-slate-900 rounded-lg hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors cursor-pointer"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Are you sure you want to delete driver ${driver.name}? This will remove associated allotments.`)) {
+                                    onDeleteDriver(driver.id);
+                                  }
+                                }}
+                                title="Delete Driver"
+                                className="p-1.5 bg-slate-900 rounded-lg hover:bg-red-500/20 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => openEditModal(driver)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
+                              title="View Details"
+                            >
+                              <Info className="w-3 h-3 text-indigo-400" />
+                              <span>View Info</span>
+                            </button>
+                          )}
                         </div>
                       </td>
 
@@ -348,7 +365,8 @@ export const DriversTab: React.FC<DriversTabProps> = ({
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6">
+              <fieldset disabled={!isAdmin} className="space-y-4">
               
               {/* Self Drive Toggle */}
               <div className="flex items-center gap-2.5 p-2.5 bg-slate-900 rounded-lg border border-slate-800">
@@ -445,6 +463,7 @@ export const DriversTab: React.FC<DriversTabProps> = ({
                   </select>
                 </div>
               </div>
+              </fieldset>
 
               {/* Form Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -453,14 +472,16 @@ export const DriversTab: React.FC<DriversTabProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {isAdmin ? 'Cancel' : 'Close'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg transition-all glow-emerald cursor-pointer"
-                >
-                  {editingDriver ? 'Update Driver' : 'Register Driver'}
-                </button>
+                {isAdmin && (
+                  <button
+                    type="submit"
+                    className="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg transition-all glow-emerald cursor-pointer"
+                  >
+                    {editingDriver ? 'Update Driver' : 'Register Driver'}
+                  </button>
+                )}
               </div>
 
             </form>

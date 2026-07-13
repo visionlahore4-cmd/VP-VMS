@@ -9,6 +9,7 @@ interface VehiclesTabProps {
   onEditVehicle: (vehicle: Vehicle) => void;
   onDeleteVehicle: (id: string) => void;
   allotments: { vehicleId: string; department: string }[];
+  isAdmin?: boolean;
 }
 
 export const VehiclesTab: React.FC<VehiclesTabProps> = ({
@@ -17,7 +18,8 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
   onAddVehicle,
   onEditVehicle,
   onDeleteVehicle,
-  allotments
+  allotments,
+  isAdmin = false
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('All');
@@ -159,12 +161,14 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
             Register and monitor specifications, regulatory documentation, and insurance status.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" /> Add Vehicle
-        </button>
+        {isAdmin && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all text-sm self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Vehicle
+          </button>
+        )}
       </div>
 
       {/* Control Filters Bar */}
@@ -373,24 +377,36 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                       {/* Actions buttons */}
                       <td className="py-3.5 px-4 text-right pr-6">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openEditModal(vehicle)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
-                          >
-                            <Edit2 className="w-3 h-3 text-emerald-400" />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to delete vehicle ${vehicle.vehicleNo}? This will remove associated assignments.`)) {
-                                onDeleteVehicle(vehicle.id);
-                              }
-                            }}
-                            title="Delete Vehicle"
-                            className="p-1.5 hover:bg-red-500/10 hover:text-red-400 rounded-lg cursor-pointer border border-transparent hover:border-red-500/10 transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-red-400" />
-                          </button>
+                          {isAdmin ? (
+                            <>
+                              <button
+                                onClick={() => openEditModal(vehicle)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
+                              >
+                                <Edit2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Are you sure you want to delete vehicle ${vehicle.vehicleNo}? This will remove associated assignments.`)) {
+                                    onDeleteVehicle(vehicle.id);
+                                  }
+                                }}
+                                title="Delete Vehicle"
+                                className="p-1.5 hover:bg-red-500/10 hover:text-red-400 rounded-lg cursor-pointer border border-transparent hover:border-red-500/10 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-red-400" />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => openEditModal(vehicle)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700 hover:border-slate-600 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
+                            >
+                              <Info className="w-3 h-3 text-indigo-400" />
+                              <span>View Specs</span>
+                            </button>
+                          )}
                         </div>
                       </td>
 
@@ -410,7 +426,7 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60 bg-[#121528]/80">
               <h3 className="font-display font-bold text-slate-100 text-lg">
-                {editingVehicle ? `Vehicle Specification - ${editingVehicle.vehicleNo}` : 'Add New Vehicle Unit'}
+                {editingVehicle ? (isAdmin ? `Vehicle Specification - ${editingVehicle.vehicleNo}` : `Specs Detail - ${editingVehicle.vehicleNo}`) : 'Add New Vehicle Unit'}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -421,7 +437,8 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-6">
+              <fieldset disabled={!isAdmin} className="space-y-5">
               
               {/* Row 1: Registration No & Model Year */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -670,6 +687,7 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                   </label>
                 </div>
               </div>
+              </fieldset>
 
               {/* Form Actions */}
               <div className="flex justify-end gap-3 pt-5 border-t border-slate-800/60">
@@ -678,14 +696,16 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-slate-800"
                 >
-                  Cancel
+                  {isAdmin ? 'Cancel' : 'Close'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 text-xs font-bold bg-[#6366f1] hover:bg-[#5053e1] text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 cursor-pointer"
-                >
-                  {editingVehicle ? 'Update Vehicle' : 'Register Vehicle'}
-                </button>
+                {isAdmin && (
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 text-xs font-bold bg-[#6366f1] hover:bg-[#5053e1] text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 cursor-pointer"
+                  >
+                    {editingVehicle ? 'Update Vehicle' : 'Register Vehicle'}
+                  </button>
+                )}
               </div>
 
             </form>

@@ -22,9 +22,10 @@ interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onLogout?: () => void;
+  isAdmin: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpen, onToggle, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpen, onToggle, onLogout, isAdmin }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'vehicles', label: 'Vehicles', icon: Car },
@@ -35,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, isOpe
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'tokentax', label: 'Token Tax & E-Tag', icon: FileText },
     { id: 'bills', label: 'Bills & Invoices', icon: Receipt },
-    { id: 'database', label: 'Data & Backup', icon: Database },
+    ...(isAdmin ? [{ id: 'database', label: 'Data & Backup', icon: Database }] : []),
   ];
 
   return (
