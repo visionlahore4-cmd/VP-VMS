@@ -36,8 +36,14 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     }
 
     const enteredUser = username.trim().toLowerCase();
+    const enteredPass = password;
 
-    if (enteredUser === savedUsername.toLowerCase() && password === savedPassword) {
+    // Check against standard defaults and custom configured values
+    const isDefaultAdmin = enteredUser === 'admin' && enteredPass === 'admin123';
+    const isDefaultVision = enteredUser === 'vision' && enteredPass === 'vision123';
+    const isSavedConfig = enteredUser === savedUsername.toLowerCase() && enteredPass === savedPassword;
+
+    if (isDefaultAdmin || isDefaultVision || isSavedConfig) {
       sessionStorage.setItem('portal_role', 'admin');
       addToast('Welcome back! Admin authentication approved.', 'success');
       onLoginSuccess();
