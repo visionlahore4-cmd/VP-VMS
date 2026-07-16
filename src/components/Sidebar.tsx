@@ -23,7 +23,6 @@ interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onLogout?: () => void;
-  onPortalLogout?: () => void;
   onAdminLoginTrigger?: () => void;
   isAdmin: boolean;
 }
@@ -34,7 +33,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen, 
   onToggle, 
   onLogout, 
-  onPortalLogout,
   onAdminLoginTrigger, 
   isAdmin 
 }) => {
@@ -69,13 +67,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="space-y-8">
           {/* App Brand / Header */}
-          <div className="flex items-center justify-between">
-            <VisionPackagingLogo layout="horizontal" size="sm" showText={true} light={false} />
+          <div className="flex items-start justify-between border-b border-slate-800/40 pb-4">
+            <VisionPackagingLogo layout="horizontal" size="sm" showText={true} light={false} showAddress={true} />
             
             {/* Close Button for Mobile */}
             <button 
               onClick={onToggle}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 lg:hidden transition-colors"
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 lg:hidden transition-colors shrink-0 mt-1"
             >
               <X className="w-5 h-5" />
             </button>
@@ -140,20 +138,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span>Admin Login</span>
               </button>
             )
-          )}
-
-          {onPortalLogout && (
-            <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to log out of the portal? This will lock the application.')) {
-                  onPortalLogout();
-                }
-              }}
-              className="w-full flex items-center gap-4 px-4 py-2 bg-slate-950/50 hover:bg-slate-950/80 rounded-md text-xs font-semibold text-slate-400 hover:text-slate-300 border border-slate-800/60 cursor-pointer transition-all"
-            >
-              <LogOut className="w-4 h-4 opacity-50" />
-              <span>Sign Out of Portal</span>
-            </button>
           )}
 
           <div className="text-center">

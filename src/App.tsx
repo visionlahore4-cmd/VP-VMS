@@ -41,14 +41,10 @@ const defaultEmptyState: AppState = {
 };
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('portal_authenticated') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
 
-  const [userRole, setUserRole] = useState<'admin' | 'user'>(() => {
-    return (sessionStorage.getItem('portal_role') as 'admin' | 'user') || 'user';
-  });
+  const [userRole, setUserRole] = useState<'admin' | 'user'>('admin');
 
   const isAdmin = userRole === 'admin';
 
@@ -67,14 +63,6 @@ export default function App() {
     sessionStorage.removeItem('portal_role');
     setUserRole('user');
     addToast('Admin mode disabled.', 'info');
-  };
-
-  const handlePortalLogout = () => {
-    sessionStorage.removeItem('portal_authenticated');
-    sessionStorage.removeItem('portal_role');
-    setIsAuthenticated(false);
-    setUserRole('user');
-    addToast('Logged out of portal session successfully.', 'info');
   };
 
   // 1. Initial Load & Seed Population
@@ -376,21 +364,6 @@ export default function App() {
     vehicleId: alt.vehicleId
   }));
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex font-sans select-none antialiased overflow-x-hidden">
-        <Toast toasts={toasts} onClose={removeToast} />
-        <LoginPortal 
-          onLoginSuccess={(role) => {
-            setUserRole(role);
-            setIsAuthenticated(true);
-          }} 
-          addToast={addToast} 
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-100 flex font-sans select-none antialiased overflow-x-hidden">
       
@@ -404,7 +377,6 @@ export default function App() {
         isOpen={isSidebarOpen} 
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
         onLogout={handleLogout}
-        onPortalLogout={handlePortalLogout}
         onAdminLoginTrigger={() => setIsAdminLoginOpen(true)}
         isAdmin={isAdmin}
       />

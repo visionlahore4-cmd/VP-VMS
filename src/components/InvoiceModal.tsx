@@ -221,6 +221,9 @@ TOTAL COST:   PKR ${Number(item.totalCost).toLocaleString()}
                   <p className="text-[9px] font-bold text-slate-500 tracking-[0.15em] uppercase mt-1.5 leading-none">
                     FLEET MANAGEMENT DEPARTMENT
                   </p>
+                  <p className="text-[8px] text-slate-400 font-medium leading-normal mt-1.5 max-w-[320px]">
+                    Plot 363,364 & 366 Sundar Industrial Estate, Raiwind Road, Lahore
+                  </p>
                 </div>
               </div>
 

@@ -6,6 +6,7 @@ interface VisionPackagingLogoProps {
   light?: boolean; // If true, optimizes for light backgrounds. If false, optimizes for dark backgrounds.
   showText?: boolean;
   layout?: 'vertical' | 'horizontal';
+  showAddress?: boolean;
 }
 
 export const VisionPackagingLogo: React.FC<VisionPackagingLogoProps> = ({
@@ -14,6 +15,7 @@ export const VisionPackagingLogo: React.FC<VisionPackagingLogoProps> = ({
   light = false,
   showText = true,
   layout = 'vertical',
+  showAddress = false,
 }) => {
   // Size mapping
   const sizeClasses = {
@@ -115,6 +117,11 @@ export const VisionPackagingLogo: React.FC<VisionPackagingLogoProps> = ({
           <p className={`font-sans font-bold uppercase tracking-[0.25em] leading-none mt-1 ${tagColor} ${selectedSize.textTag}`}>
             Safe Inside
           </p>
+          {showAddress && (
+            <p className={`font-sans text-[9px] ${light ? 'text-slate-500' : 'text-slate-400'} mt-1.5 leading-relaxed font-medium ${isHorizontal ? 'max-w-[220px]' : 'max-w-[220px] mx-auto text-center'}`}>
+              Plot 363,364 & 366 Sundar Industrial Estate, Raiwind Road, Lahore
+            </p>
+          )}
         </div>
       )}
     </div>

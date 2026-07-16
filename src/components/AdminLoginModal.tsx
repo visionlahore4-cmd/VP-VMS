@@ -79,6 +79,9 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">
                 Fleet Management — Admin Portal
               </p>
+              <p className="text-[9px] font-medium text-slate-400 leading-relaxed max-w-[320px] mx-auto pt-1">
+                Plot 363,364 & 366 Sundar Industrial Estate, Raiwind Road, Lahore
+              </p>
               <div className="h-[2px] w-12 bg-rose-600 mx-auto mt-3 rounded-full"></div>
             </div>
           </div>
